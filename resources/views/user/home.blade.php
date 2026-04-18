@@ -1,389 +1,410 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Irigasi & Perlindungan Padi IoT</title>
+    <title>SmartOryza - Sistem Irigasi & Perlindungan Padi IoT</title>
 
-    <!-- Google Fonts -->
+    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,700;1,500&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans:['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif:['"Playfair Display"', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            900: '#2b5329', // Forest Green
+                        },
+                        accent: '#a4c639', // Leaf Green
+                        soft: '#f8fbf8' // Subtle nature background
+                    },
+                    animation: {
+                        blob: "blob 7s infinite",
+                    },
+                    keyframes: {
+                        blob: {
+                            "0%": { transform: "translate(0px, 0px) scale(1)" },
+                            "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+                            "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+                            "100%": { transform: "translate(0px, 0px) scale(1)" },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
-        /* CSS VARIABLES */
-        :root {
-            --bg-color: #f4f7f4;
-            --text-main: #4a5347;
-            --forest-green: #2b5329;
-            --leaf-green: #688f4e;
-            --earth-brown: #8b5a2b;
-            --sunlight: #fdf5e6;
-            --card-bg: #ffffff;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Nunito', sans-serif;
-            line-height: 1.8;
-            font-size: 1.05rem;
-            overflow-x: hidden; /* Mencegah scroll horizontal dari animasi */
-        }
-
-        h1, h2, h3 { font-family: 'Lora', serif; }
-
-        /* NAVBAR */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--forest-green);
-            padding: 1.2rem 10%;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 15px rgba(43, 83, 41, 0.2);
-        }
-
-        /* ANIMASI CAHAYA MATAHARI PADA LOGO */
-        .navbar-brand {
-            color: #ffffff;
-            font-size: 1.6rem;
-            font-family: 'Lora', serif;
-            font-weight: 700;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(120deg, #ffffff 0%, #ffffff 40%, #a4c639 50%, #ffffff 60%, #ffffff 100%);
-            background-size: 200% auto;
-            color: transparent;
-            -webkit-background-clip: text;
-            background-clip: text;
-            animation: sunlight-shine 5s linear infinite;
-        }
-
-        .navbar-brand span { color: #a4c639; }
-
-        .nav-links { display: flex; list-style: none; }
-        .nav-links li { margin-left: 30px; }
-        .nav-links a {
-            color: var(--sunlight);
-            text-decoration: none;
-            font-weight: 600;
-            position: relative;
-        }
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            width: 0; height: 2px; bottom: -5px; left: 0;
-            background-color: #a4c639;
-            transition: width 0.4s ease-in-out;
-        }
-        .nav-links a:hover::after { width: 100%; }
-
-        /* HERO SECTION DENGAN ANIMASI AMBIENT ZOOM */
-        .header-banner {
-            position: relative;
-            padding: 120px 10% 100px;
-            text-align: center;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 60vh;
-        }
-
-        .hero-bg {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(43, 83, 41, 0.7), rgba(139, 90, 43, 0.5)),
-                        url('https://images.unsplash.com/photo-1550989460-0adf9ea622e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
-            background-size: cover;
-            background-position: center;
-            z-index: -1;
-            animation: ambient-zoom 20s ease-in-out infinite alternate;
-        }
-
-        .header-banner h1 {
-            color: white;
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
-            animation: fade-up 1.5s ease-out forwards;
+        .reveal {
             opacity: 0;
             transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
         }
-
-        .header-banner p {
-            color: white;
-            font-size: 1.2rem;
-            max-width: 800px;
-            opacity: 0;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
-            animation: fade-up 1.5s ease-out 0.5s forwards;
-            transform: translateY(30px);
-        }
-
-        /* MAIN CONTENT */
-        .container {
-            max-width: 900px;
-            margin: -60px auto 60px;
-            background: var(--card-bg);
-            padding: 50px 60px;
-            border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(43, 83, 41, 0.1);
-            position: relative;
-            z-index: 10;
-        }
-
-        .content-section { margin-bottom: 50px; }
-
-        h2 {
-            color: var(--forest-green);
-            border-bottom: 2px dashed #e2e8de;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        /* ANIMASI DAUN TERTIUP ANGIN PADA JUDUL */
-        .sprout-icon {
-            display: inline-block;
-            font-size: 1.8rem;
-            transform-origin: bottom center;
-            animation: sway 4s ease-in-out infinite;
-        }
-
-        p { margin-bottom: 20px; text-align: justify; }
-
-        /* HIGHLIGHT BOX */
-        .highlight-card {
-            background-color: #faf9f0;
-            border-left: 5px solid var(--earth-brown);
-            padding: 25px 30px;
-            margin: 35px 0;
-            border-radius: 0 15px 15px 0;
-            font-family: 'Lora', serif;
-            font-style: italic;
-            color: var(--earth-brown);
-            font-size: 1.1rem;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s ease;
-        }
-
-        .highlight-card:hover {
-            transform: translateX(10px);
-            background-color: #fdfbf2;
-        }
-
-        /* FEATURE GRID */
-        .tech-features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-top: 35px;
-        }
-
-        .feature-item {
-            background: #f8faf6;
-            padding: 30px 25px;
-            border-radius: 16px;
-            border: 1px solid #e2e8de;
-            text-align: center;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efek organik natural */
-        }
-
-        .feature-item:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 15px 30px rgba(104, 143, 78, 0.15);
-            border-color: var(--leaf-green);
-            background: white;
-        }
-
-        /* ANIMASI IKON MELAYANG (FLOATING) */
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            display: inline-block;
-            animation: float 4s ease-in-out infinite;
-        }
-
-        .feature-item:nth-child(2) .feature-icon { animation-delay: 1s; }
-        .feature-item:nth-child(3) .feature-icon { animation-delay: 2s; }
-
-        .feature-item strong {
-            color: var(--forest-green);
-            font-family: 'Lora', serif;
-            font-size: 1.2rem;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            background-color: var(--forest-green);
-            color: #a4c639;
-        }
-
-        /* --- KEYFRAMES (KAMUS ANIMASI) --- */
-
-        /* Matahari mengkilap di teks */
-        @keyframes sunlight-shine {
-            to { background-position: 200% center; }
-        }
-
-        /* Zoom In Out pelan pada background awah */
-        @keyframes ambient-zoom {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.1); }
-        }
-
-        /* Muncul dari bawah seperti tunas */
-        @keyframes fade-up {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Bergoyang seperti tertiup angin */
-        @keyframes sway {
-            0%, 100% { transform: rotate(-8deg); }
-            50% { transform: rotate(12deg); }
-        }
-
-        /* Melayang perlahan naik turun */
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-12px); }
-        }
-
-        /* --- KELAS UNTUK ANIMASI SCROLL (GROWTH EFFECT) --- */
-        .nature-reveal {
-            opacity: 0;
-            transform: translateY(40px) scale(0.95);
-            transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .nature-reveal.active {
+        .reveal.active {
             opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .container { margin: -30px 20px 40px; padding: 30px 25px; }
-            .nav-links { display: none; }
-            .header-banner h1 { font-size: 2.2rem; }
+            transform: translateY(0);
         }
     </style>
 </head>
-<body>
+<body class="font-sans text-gray-700 bg-soft antialiased selection:bg-brand-500 selection:text-white">
 
-    <nav class="navbar">
-        <a href="#" class="navbar-brand">🌾 Smart<span>Oryza</span></a>
-        <ul class="nav-links">
-            <li><a href="#pendahuluan">Pendahuluan</a></li>
-            <li><a href="#permasalahan">Permasalahan</a></li>
-            <li><a href="#solusi">Solusi IoT</a></li>
-        </ul>
-    </nav>
-
-    <header class="header-banner">
-        <div class="hero-bg"></div>
-        <h1>Modernisasi Pertanian Padi</h1>
-        <p>Menyelaraskan Kebijaksanaan Alam dengan Inovasi Internet of Things untuk Panen yang Melimpah</p>
-    </header>
-
-    <div class="container">
-
-        <!-- Tambahkan class 'nature-reveal' pada elemen yang ingin dianimasikan saat di-scroll -->
-        <section id="pendahuluan" class="content-section nature-reveal">
-            <h2><span class="sprout-icon">🌱</span> Latar Belakang</h2>
-            <p>
-                Pertanian merupakan detak jantung kehidupan Nusantara, khususnya tanaman padi yang menjadi sumber pangan utama masyarakat Indonesia. Dalam proses budidaya padi, air adalah elemen kehidupan; pengaturan irigasi menjadi faktor krusial yang menentukan kesuburan tanah dan hasil panen.
-            </p>
-            <p>
-                Keseimbangan air yang pas—tidak kurang dan tidak berlebih—sangat dibutuhkan oleh tanaman untuk tumbuh dengan sehat, menjaga kelestarian unsur hara tanah, dan memastikan produktivitas pertanian yang berkelanjutan dari musim ke musim.
-            </p>
-        </section>
-
-        <section id="permasalahan" class="content-section nature-reveal">
-            <h2><span class="sprout-icon">🍃</span> Kondisi di Lapangan</h2>
-            <p>
-                Berdasarkan bincang hangat dengan <strong>Bapak Junaidi</strong>, seorang petani yang telah mengabdi pada sawahnya sejak tahun 2002, aliran air ke petak sawah saat ini masih sangat bergantung pada tenaga manusia dan intuisi semata. Air sungai dialirkan secara manual tanpa takaran pasti.
-            </p>
-
-            <div class="highlight-card nature-reveal">
-                "Cara tradisional terkadang membuat kita kewalahan. Saat musim hujan lebat, sawah kebanjiran dan akar padi membusuk. Sebaliknya saat kemarau, kita terlambat menyadari tanah sudah mengering."
+    <!-- POP-UP NOTIFIKASI GLOBAL -->
+    <div id="notificationPopup" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-[200] transition-all duration-300 opacity-0 -translate-y-10 pointer-events-none">
+        <div class="bg-white px-6 py-4 rounded-2xl shadow-2xl border border-gray-100 flex items-center gap-4 min-w-[320px]">
+            <div id="notifyIcon" class="w-10 h-10 rounded-full flex items-center justify-center text-lg"></div>
+            <div>
+                <h4 id="notifyTitle" class="font-bold text-gray-900">Judul</h4>
+                <p id="notifyMessage" class="text-sm text-gray-500">Pesan notifikasi...</p>
             </div>
-
-            <p>
-                Kewajiban untuk memantau pematang sawah secara langsung setiap pagi dan sore hari menguras banyak waktu dan tenaga. Oleh karena itu, diperlukan sebuah jembatan antara kearifan lokal petani dengan kemudahan teknologi masa kini.
-            </p>
-        </section>
-
-        <section id="solusi" class="content-section nature-reveal">
-            <h2><span class="sprout-icon">🌿</span> Solusi Teknologi Harmonis</h2>
-            <p>
-                Sentuhan teknologi <strong>Internet of Things (IoT)</strong> hadir bukan untuk menggantikan peran petani, melainkan menjadi asisten digital yang bekerja 24 jam. Sistem otomasi ini dirancang agar ramah lingkungan dan terdiri dari:
-            </p>
-
-            <div class="tech-features">
-                <div class="feature-item nature-reveal" style="transition-delay: 0.1s;">
-                    <div class="feature-icon">💧</div>
-                    <strong>Sensor Kelembapan</strong>
-                    <p>Merasakan kadar air di dalam tanah secara presisi, mengetahui kapan tanah benar-benar haus.</p>
-                </div>
-                <div class="feature-item nature-reveal" style="transition-delay: 0.3s;">
-                    <div class="feature-icon">⚙️</div>
-                    <strong>Katup Air Pintar</strong>
-                    <p>Membuka dan menutup aliran air secara otomatis sesuai kebutuhan biologis tanaman padi.</p>
-                </div>
-                <div class="feature-item nature-reveal" style="transition-delay: 0.5s;">
-                    <div class="feature-icon">🦅</div>
-                    <strong>Penjaga Ekosistem</strong>
-                    <p>Sensor pendeteksi hama burung yang terhubung dengan penggerak orang-orangan sawah otomatis.</p>
-                </div>
-            </div>
-
-            <p style="margin-top: 35px;" class="nature-reveal">
-                Melalui harmoni antara alam dan inovasi IoT ini, para petani dapat merawat lahan mereka dengan lebih efisien, menghemat penggunaan air bersih, serta melindungi tanaman padi dari ancaman hama secara manusiawi dan berkelanjutan.
-            </p>
-        </section>
-
+            <button onclick="closePopup()" class="ml-auto pl-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
     </div>
 
-    <footer>
-        <p>&copy; 2026 Smart Oryza - Merawat Bumi, Memberi Makan Negeri.</p>
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 top-0 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 bg-brand-900 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                        <span class="text-xl text-white">🌾</span>
+                    </div>
+                    <span class="text-2xl font-bold font-serif text-brand-900 tracking-tight">
+                        Smart<span class="text-brand-500">Oryza</span>
+                    </span>
+                </a>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#latar-belakang" class="text-sm font-semibold text-gray-600 hover:text-brand-600 transition">Pendahuluan</a>
+                    <a href="#solusi" class="text-sm font-semibold text-gray-600 hover:text-brand-600 transition">Solusi IoT</a>
+                    
+                    <div class="w-px h-6 bg-gray-200"></div>
+
+                    @if (Route::has('login'))
+                        @auth
+                            <a href="{{ url('/dashboard') }}" class="text-sm font-bold text-white bg-brand-900 px-5 py-2.5 rounded-full hover:bg-brand-800 transition shadow-md shadow-brand-900/20">Dashboard</a>
+                            <form method="POST" action="{{ route('logout') }}" class="inline">
+                                @csrf
+                                <button type="submit" class="text-sm font-semibold text-red-500 hover:text-red-700 transition">Logout</button>
+                            </form>
+                        @else
+                            <button onclick="openModal('login')" class="text-sm font-bold text-white bg-brand-900 px-5 py-2.5 rounded-full hover:bg-brand-800 transition shadow-md shadow-brand-900/20">Masuk</button>
+                        @endauth
+                    @endif
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-100" 
+             style="background-image: url('{{ asset('images/padi.jpg') }}');"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-white/80 via-white/30 to-[#f4f7f4]"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-100 text-brand-700 text-xs font-bold mb-6 border border-brand-200 shadow-sm">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+                </span>
+                Sistem IoT Aktif 24/7
+            </div>
+            <h1 class="text-4xl md:text-6xl font-extrabold font-serif text-brand-900 tracking-tight leading-tight mb-6 max-w-4xl mx-auto reveal">
+                Modernisasi Pertanian Padi <br> <span class="text-brand-500 drop-shadow-sm">Berbasis Teknologi</span>
+            </h1>
+            <p class="text-lg text-gray-800 font-medium mb-10 max-w-2xl mx-auto leading-relaxed reveal" style="transition-delay: 0.1s;">
+                Menyelaraskan kebijaksanaan alam dengan inovasi Internet of Things (IoT) untuk efisiensi irigasi, perlindungan hama, dan panen yang lebih melimpah.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 reveal" style="transition-delay: 0.2s;">
+                <button onclick="openModal('login')" class="w-full sm:w-auto px-8 py-3.5 text-base font-bold text-white bg-brand-900 rounded-full hover:bg-brand-800 transition-all shadow-lg shadow-brand-900/30 hover:-translate-y-1">
+                    Mulai Sekarang <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+                <a href="#solusi" class="w-full sm:w-auto px-8 py-3.5 text-base font-bold text-brand-900 bg-white/90 backdrop-blur-sm border border-brand-200 rounded-full hover:bg-white transition-all shadow-sm hover:shadow-md">
+                    Pelajari Fitur
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Background & Problem -->
+    <section id="latar-belakang" class="relative py-24 overflow-hidden">
+        <div class="absolute top-0 left-10 w-72 h-72 bg-brand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+        <div class="absolute top-0 right-10 w-72 h-72 bg-[#e4eba7] rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob" style="animation-delay: 2s;"></div>
+        <div class="absolute -bottom-8 left-40 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob" style="animation-delay: 4s;"></div>
+
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center reveal">
+                <div>
+                    <div class="w-12 h-12 bg-orange-100/80 backdrop-blur text-orange-600 rounded-2xl flex items-center justify-center text-xl mb-6 shadow-sm border border-orange-200/50">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold font-serif text-brand-900 mb-4">Akar Permasalahan di Lapangan</h2>
+                    <p class="text-gray-600 mb-6 leading-relaxed text-justify">
+                        Pertanian merupakan detak jantung kehidupan Nusantara. Dalam budidaya padi, air adalah elemen kehidupan. Keseimbangan air yang pas—tidak kurang dan tidak berlebih—sangat dibutuhkan oleh tanaman untuk tumbuh dengan sehat dan memastikan produktivitas.
+                    </p>
+                    <p class="text-gray-600 leading-relaxed text-justify">
+                        Namun, kewajiban memantau sawah secara langsung setiap pagi dan sore hari menguras banyak waktu dan tenaga. Perubahan iklim yang tidak menentu memperburuk situasi bagi petani konvensional.
+                    </p>
+                </div>
+                <div class="relative">
+                    <div class="absolute inset-0 bg-brand-500 rounded-3xl transform rotate-3 scale-105 opacity-10"></div>
+                    <div class="relative bg-white/90 backdrop-blur-sm p-8 md:p-10 rounded-3xl border border-white shadow-xl">
+                        <i class="fas fa-quote-left text-4xl text-brand-100 absolute top-8 left-8"></i>
+                        <p class="relative z-10 text-xl font-serif italic text-gray-800 leading-relaxed mt-6 mb-8">
+                            "Cara tradisional terkadang membuat kita kewalahan. Saat musim hujan lebat, sawah kebanjiran dan akar padi membusuk. Di musim kemarau, kita telat mengairi."
+                        </p>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-brand-100 rounded-full flex items-center justify-center border border-brand-200">
+                                <i class="fas fa-user text-brand-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">Bapak Junaidi</h4>
+                                <p class="text-sm text-brand-600 font-medium">Petani Padi sejak 2002</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution & Features -->
+    <div class="px-4 lg:px-8 max-w-[90rem] mx-auto mb-20">
+        <section id="solusi" class="relative bg-brand-900 rounded-[2.5rem] lg:rounded-[3.5rem] py-20 px-6 lg:px-12 shadow-2xl overflow-hidden">
+            <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-600 rounded-full filter blur-[100px] opacity-30 mix-blend-screen"></div>
+            <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent rounded-full filter blur-[100px] opacity-20 mix-blend-screen"></div>
+
+            <div class="relative z-10 text-center max-w-3xl mx-auto mb-16 reveal">
+                <h2 class="text-3xl font-bold font-serif text-white mb-4">Solusi Teknologi Harmonis</h2>
+                <p class="text-brand-100 text-lg">Sentuhan teknologi Internet of Things (IoT) hadir bukan untuk menggantikan peran petani, melainkan sebagai asisten cerdas yang bekerja 24 jam penuh.</p>
+            </div>
+
+            <div class="relative z-10 grid md:grid-cols-3 gap-6 lg:gap-8 reveal">
+                <div class="bg-white p-8 rounded-3xl shadow-lg hover:-translate-y-2 transition-all duration-300 group">
+                    <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Sensor Kelembapan</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Membaca kadar air dalam tanah secara presisi dan real-time. Memastikan tanah tidak pernah kekeringan atau kelebihan air.</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-3xl shadow-lg hover:-translate-y-2 transition-all duration-300 group" style="transition-delay: 0.1s;">
+                    <div class="w-14 h-14 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-brand-600 group-hover:text-white transition-all duration-300">
+                        <i class="fas fa-faucet"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Katup Irigasi Pintar</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Membuka dan menutup aliran air secara otomatis berdasarkan data sensor, atau dapat dikontrol secara manual lewat Dashboard.</p>
+                </div>
+
+                <div class="bg-white p-8 rounded-3xl shadow-lg hover:-translate-y-2 transition-all duration-300 group" style="transition-delay: 0.2s;">
+                    <div class="w-14 h-14 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-amber-500 group-hover:text-white transition-all duration-300">
+                        <i class="fas fa-crow"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Sistem Pengusir Hama</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Sensor PIR mendeteksi pergerakan hama burung dan secara otomatis mengaktifkan penggerak orang-orangan sawah.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 py-10">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">🌾</span>
+                <span class="text-lg font-bold font-serif text-brand-900">SmartOryza</span>
+            </div>
+            <p class="text-gray-500 text-sm">&copy; 2026 Smart Oryza - Merawat Bumi, Memberi Makan Negeri.</p>
+        </div>
     </footer>
 
-    <!-- SCRIPT KECIL UNTUK ANIMASI SCROLL (Efek tumbuh dari tanah) -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const observerOptions = {
-                root: null,
-                rootMargin: '0px',
-                threshold: 0.15 // Animasi mulai saat 15% elemen terlihat di layar
-            };
+    <!-- ================= MODAL LOGIN & REGISTER ================= -->
+    <div id="authModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4">
+        <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        
+        <div id="modalPanel" class="bg-white w-full max-w-md rounded-3xl shadow-2xl relative z-10 overflow-hidden transform scale-95 opacity-0 transition-all duration-300 border border-white">
+            <div class="bg-brand-900 p-6 text-center relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-white opacity-5 rounded-full blur-xl"></div>
+                <button onclick="closeModal()" class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-md">
+                    <i class="fas fa-lock text-white text-lg"></i>
+                </div>
+                <h3 id="modalTitle" class="text-xl font-bold font-serif text-white relative z-10">Selamat Datang</h3>
+                <p class="text-brand-100 text-sm mt-1 relative z-10">Silakan masuk ke akun Anda</p>
+            </div>
 
-            const observer = new IntersectionObserver((entries, observer) => {
+            <div class="p-8 bg-soft">
+                <!-- FORM LOGIN -->
+                <form id="loginForm" method="POST" action="{{ route('login') }}" class="space-y-4 block">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Email</label>
+                        <input type="email" name="email" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition shadow-sm" placeholder="contoh@email.com" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Kata Sandi</label>
+                        <input type="password" name="password" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition shadow-sm" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="w-full py-3.5 mt-2 bg-brand-900 text-white font-bold rounded-xl hover:bg-brand-800 transition shadow-lg shadow-brand-900/20 flex justify-center items-center gap-2">
+                        <span>Masuk ke Dashboard</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menangani Pesan Error Bawaan Laravel jika di-refresh -->
+    @if ($errors->any())
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                openModal('login');
+                showPopup('error', 'Gagal', '{{ $errors->first() }}');
+            });
+        </script>
+    @endif
+
+    <script>
+        // --- ANIMASI SCROLL ---
+        document.addEventListener("DOMContentLoaded", function() {
+            const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('active');
-                        observer.unobserve(entry.target); // Hanya dijalankan sekali
+                        observer.unobserve(entry.target);
                     }
                 });
-            }, observerOptions);
+            }, { threshold: 0.1 });
 
-            const revealElements = document.querySelectorAll('.nature-reveal');
-            revealElements.forEach(el => observer.observe(el));
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        });
+
+        // --- SISTEM POPUP NOTIFIKASI ---
+        let popupTimeout;
+        function showPopup(type, title, message) {
+            const popup = document.getElementById('notificationPopup');
+            const icon = document.getElementById('notifyIcon');
+            const titleEl = document.getElementById('notifyTitle');
+            const msgEl = document.getElementById('notifyMessage');
+
+            titleEl.textContent = title;
+            msgEl.textContent = message;
+
+            if (type === 'success') {
+                icon.className = 'w-10 h-10 rounded-full flex items-center justify-center text-lg bg-emerald-100 text-emerald-600';
+                icon.innerHTML = '<i class="fas fa-check"></i>';
+            } else {
+                icon.className = 'w-10 h-10 rounded-full flex items-center justify-center text-lg bg-red-100 text-red-600';
+                icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+            }
+
+            popup.classList.remove('opacity-0', '-translate-y-10', 'pointer-events-none');
+            popup.classList.add('opacity-100', 'translate-y-0');
+
+            clearTimeout(popupTimeout);
+            popupTimeout = setTimeout(closePopup, 5000);
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('notificationPopup');
+            popup.classList.remove('opacity-100', 'translate-y-0');
+            popup.classList.add('opacity-0', '-translate-y-10', 'pointer-events-none');
+        }
+
+        // --- LOGIKA MODAL ---
+        const modal = document.getElementById('authModal');
+        const modalPanel = document.getElementById('modalPanel');
+
+        function openModal(type = 'login') {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modalPanel.classList.remove('scale-95', 'opacity-0');
+                modalPanel.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            switchTab(type);
+        }
+
+        function closeModal() {
+            modalPanel.classList.remove('scale-100', 'opacity-100');
+            modalPanel.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function switchTab(type) {
+            const modalTitle = document.getElementById('modalTitle');
+            modalTitle.textContent = 'Selamat Datang Kembali';
+        }
+
+        // --- PENGIRIMAN FORM (AJAX INTERCEPT) ---
+        
+        // 1. Logika Form Login
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); 
+            const btn = this.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Memproses...</span>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    headers: { 
+                        'X-Requested-With': 'XMLHttpRequest', 
+                        'Accept': 'application/json' 
+                    },
+                    credentials: 'same-origin', // SANGAT PENTING untuk Laravel Security
+                    body: new FormData(this)
+                });
+
+                // Jika login sukses (bisa berstatus 200/204 atau redirect 302 yang diikuti browser)
+                if (response.ok || response.redirected) {
+                    window.location.href = "{{ url('/dashboard') }}";
+                } 
+                // Jika error 422, artinya validasi gagal (salah email / password)
+                else if (response.status === 422) {
+                    const data = await response.json();
+                    let errorMsg = 'Email atau kata sandi yang Anda masukkan salah.';
+                    if(data.errors) errorMsg = Object.values(data.errors)[0][0]; 
+                    
+                    showPopup('error', 'Login Gagal', errorMsg);
+                } 
+                // Jika error 419, CSRF Token Expired (Kelamaan diam / session terputus)
+                else if (response.status === 419) {
+                    showPopup('error', 'Sesi Berakhir', 'Keamanan sesi habis. Halaman akan dimuat ulang.');
+                    setTimeout(() => window.location.reload(), 2000);
+                } 
+                // Error lainnya
+                else {
+                    showPopup('error', 'Kesalahan Sistem', 'Tidak dapat terhubung ke server.');
+                }
+            } catch (err) {
+                showPopup('error', 'Koneksi Terputus', 'Periksa koneksi internet Anda.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         });
     </script>
 </body>

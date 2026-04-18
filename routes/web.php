@@ -1,26 +1,30 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\AuthController;
 
-// Default endpoint (Bisa digunakan untuk welcome page API)
-Route::get('/', [UserController::class, 'index']);
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
-// === Routes untuk SPA Frontend (Next.js/React) ===
+// Halaman Homepage (dengan modal login)
+Route::get('/', function () {
+    return view('user.home'); 
+})->name('home');
 
-// Route Authentication (Login & Register)
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+// Dashboard (hanya bisa diakses setelah login)
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware('auth')->name('dashboard');
 
-// Protected Route untuk Dashboard 
-// (Middleware auth:sanctum memastikan hanya user yang login yang bisa akses API dashboard ini)
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (\Illuminate\Http\Request $request) {
-        return $request->user();
-    });
-    
-    // Tambahkan API endpoint lain untuk dashboard di sini
-    // Route::get('/dashboard/data', [DashboardController::class, 'data']);
+// Profile Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Auth Routes (Login, Register, dll)
+require __DIR__.'/auth.php';
