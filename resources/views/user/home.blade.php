@@ -268,6 +268,43 @@
                         <span>Masuk ke Dashboard</span>
                     </button>
                 </form>
+                <!-- FORM REGISTER -->
+                <form id="registerForm" method="POST" action="{{ route('register') }}" class="space-y-4 hidden">
+                    @csrf
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Nama</label>
+                        <input type="text" name="name" required class="w-full px-4 py-3 rounded-xl border border-gray-200">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Email</label>
+                        <input type="email" name="email" required class="w-full px-4 py-3 rounded-xl border border-gray-200">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Password</label>
+                        <input type="password" name="password" required class="w-full px-4 py-3 rounded-xl border border-gray-200">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Konfirmasi Password</label>
+                        <input type="password" name="password_confirmation" required class="w-full px-4 py-3 rounded-xl border border-gray-200">
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 mt-2 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition">
+                        Daftar
+                    </button>
+                </form>
+                <div class="text-center mt-4">
+                <button onclick="switchTab('register')" id="toRegister" class="text-sm text-green-600">
+                    Belum punya akun? Daftar
+                </button>
+
+                <button onclick="switchTab('login')" id="toLogin" class="text-sm text-blue-600 hidden">
+                    Sudah punya akun? Login
+                </button>
+            </div>
             </div>
         </div>
     </div>
@@ -353,8 +390,29 @@
         }
 
         function switchTab(type) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const toLogin = document.getElementById('toLogin');
+            const toRegister = document.getElementById('toRegister');
             const modalTitle = document.getElementById('modalTitle');
-            modalTitle.textContent = 'Selamat Datang Kembali';
+
+            if (type === 'register') {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+
+                toRegister.classList.add('hidden');
+                toLogin.classList.remove('hidden');
+
+                modalTitle.textContent = 'Buat Akun Baru';
+            } else {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+
+                toRegister.classList.remove('hidden');
+                toLogin.classList.add('hidden');
+
+                modalTitle.textContent = 'Selamat Datang Kembali';
+            }
         }
 
         // --- PENGIRIMAN FORM (AJAX INTERCEPT) ---
@@ -380,8 +438,16 @@
 
                 // Jika login sukses (bisa berstatus 200/204 atau redirect 302 yang diikuti browser)
                 if (response.ok || response.redirected) {
-                    window.location.href = "{{ url('/dashboard') }}";
-                } 
+                    showPopup('success', 'Berhasil', 'Login berhasil!');
+
+                    // UX kecil
+                    document.getElementById('loginForm').reset();
+
+                    // kasih delay biar user lihat notif dulu
+                    setTimeout(() => {
+                        window.location.href = "{{ url('/dashboard') }}";
+                    }, 1500);
+                }
                 // Jika error 422, artinya validasi gagal (salah email / password)
                 else if (response.status === 422) {
                     const data = await response.json();
@@ -401,6 +467,49 @@
                 }
             } catch (err) {
                 showPopup('error', 'Koneksi Terputus', 'Periksa koneksi internet Anda.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // 2. Logika Form Register (AJAX)
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const btn = this.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Memproses...</span>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    body: new FormData(this)
+                });
+
+                if (response.ok) {
+                    showPopup('success', 'Berhasil', 'Akun berhasil dibuat!');
+                    
+                    // 👉 UX kecil (biar smooth)
+                    this.reset(); // kosongkan form
+                    switchTab('login'); // pindah ke login
+                } 
+                else if (response.status === 422) {
+                    const data = await response.json();
+                    let errorMsg = Object.values(data.errors)[0][0];
+                    showPopup('error', 'Registrasi Gagal', errorMsg);
+                } 
+                else {
+                    showPopup('error', 'Error', 'Terjadi kesalahan.');
+                }
+            } catch (err) {
+                showPopup('error', 'Koneksi', 'Tidak terhubung ke server.');
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;

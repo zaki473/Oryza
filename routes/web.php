@@ -2,29 +2,35 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SensorController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
-// Halaman Homepage (dengan modal login)
+// Home
 Route::get('/', function () {
     return view('user.home'); 
 })->name('home');
 
-// Dashboard (hanya bisa diakses setelah login)
+// Dashboard
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware('auth')->name('dashboard');
 
-// Profile Routes
+// Profile
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Auth Routes (Login, Register, dll)
+// API SENSOR
+Route::prefix('api')->group(function () {
+
+    Route::get('/sensor', [SensorController::class, 'getData']);
+
+    Route::post('/sensor', [SensorController::class, 'store'])
+        ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
+    Route::get('/history', [SensorController::class, 'history']); // 🔥 tambahan
+});
+
+// Auth
 require __DIR__.'/auth.php';

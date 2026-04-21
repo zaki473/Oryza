@@ -19,6 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
+
     <script>
         tailwind.config = {
             theme: {
@@ -249,11 +250,13 @@
                     <p class="text-sm font-medium text-blue-100 mb-1">Cuaca Sawah Saat Ini</p>
                     <div class="flex items-center gap-3 mt-2">
                         <i class="fas fa-cloud-sun text-4xl text-yellow-300"></i>
-                        <h3 class="text-4xl font-extrabold">28°<span class="text-2xl font-semibold">C</span></h3>
+                        <h3 class="text-4xl font-extrabold">
+                            <span id="weather-temp">--°C</span>
+                        </h3>
                     </div>
                     <div class="mt-4 flex gap-4 text-xs text-blue-100 font-medium">
-                        <span><i class="fas fa-droplet mr-1"></i> Kelembapan: 75%</span>
-                        <span><i class="fas fa-wind mr-1"></i> Angin: 12 km/h</span>
+                        <span id="weather-humidity">--%</span>
+                        <span id="weather-wind">-- km/h</span>
                     </div>
                 </div>
             </div>
@@ -385,7 +388,73 @@
 
     </main>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        const firebaseConfig = {
+            databaseURL: "https://smartoryza-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const userId = "1";
+        const deviceId = "A1";
+
+        const sensorRef = ref(db, `users/${userId}/devices/${deviceId}/latest`);
+
+        onValue(sensorRef, (snapshot) => {
+            const data = snapshot.val();
+
+            if (!data) return;
+
+            // SOIL
+            const soil = data.soil ?? 0;
+            document.getElementById('soil-value').innerText = soil;
+            document.getElementById('soil-bar').style.width = soil + "%";
+
+            // WATER
+            document.getElementById('distance').innerText = data.water ?? 0;
+
+            // PIR
+            const pirStatus = document.getElementById('pir-status');
+            const pirDot = document.getElementById('pir-dot');
+
+            const status = (data.pir || "").toLowerCase();
+            pirStatus.innerText = data.pir ?? "-";
+
+            if (status === "bahaya") {
+                pirStatus.classList.remove('text-emerald-600');
+                pirStatus.classList.add('text-red-600');
+                pirDot.classList.remove('bg-emerald-500');
+                pirDot.classList.add('bg-red-500');
+            } else {
+                pirStatus.classList.remove('text-red-600');
+                pirStatus.classList.add('text-emerald-600');
+                pirDot.classList.remove('bg-red-500');
+                pirDot.classList.add('bg-emerald-500');
+            }
+
+            // === CHART REALTIME ===
+            const now = new Date();
+            const timeLabel = now.getHours() + ":" + now.getMinutes();
+
+            soilData.push(soil);
+            waterData.push(data.water ?? 0);
+            labels.push(timeLabel);
+
+            if (soilData.length > 10) {
+                soilData.shift();
+                waterData.shift();
+                labels.shift();
+            }
+
+            historyChart.data.labels = labels;
+            historyChart.data.datasets[0].data = soilData;
+            historyChart.data.datasets[1].data = waterData;
+            historyChart.update();
+        });
+        
         // Update Time
         function updateTime() {
             const now = new Date();
@@ -397,6 +466,9 @@
 
         // Chart.js Configuration
         const ctx = document.getElementById('historyChart').getContext('2d');
+        let soilData = [];
+        let waterData = [];
+        let labels = [];
         const gradientBlue = ctx.createLinearGradient(0, 0, 0, 400);
         gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
         gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
@@ -405,14 +477,14 @@
         gradientGreen.addColorStop(0, 'rgba(34, 197, 94, 0.5)');
         gradientGreen.addColorStop(1, 'rgba(34, 197, 94, 0.0)');
 
-        new Chart(ctx, {
+        const historyChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels:['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
                 datasets:[
                     {
                         label: 'Kelembapan Tanah (%)',
-                        data:[65, 59, 80, 81, 56, 55, 68],
+                        data:[],
                         borderColor: '#3b82f6',
                         backgroundColor: gradientBlue,
                         borderWidth: 3,
@@ -698,6 +770,172 @@
                 restoreDownloadButton(btnIcon, btnText);
             }, 1000); // Simulasi render 1 detik
         }
+            // ==========================
+            // REALTIME SENSOR (API)
+            // ==========================
+            async function getSensorData() {
+                try {
+                    const res = await fetch('/api/sensor');
+
+                    if (!res.ok) throw new Error("API Error");
+
+                    const data = await res.json();
+
+                    // SOIL
+                    const soil = data.soil ?? 0;
+                    document.getElementById('soil-value').innerText = soil;
+                    document.getElementById('soil-bar').style.width = soil + "%";
+
+                    // WATER
+                    document.getElementById('distance').innerText = data.water ?? 0;
+
+                    // PIR
+                    const pirStatus = document.getElementById('pir-status');
+                    const pirDot = document.getElementById('pir-dot');
+
+                    const status = (data.pir || "").toLowerCase();
+                    pirStatus.innerText = data.pir ?? "-";
+
+                    if (status === "bahaya") {
+                        pirStatus.classList.remove('text-emerald-600');
+                        pirStatus.classList.add('text-red-600');
+
+                        pirDot.classList.remove('bg-emerald-500');
+                        pirDot.classList.add('bg-red-500');
+                    } else {
+                        pirStatus.classList.remove('text-red-600');
+                        pirStatus.classList.add('text-emerald-600');
+
+                        pirDot.classList.remove('bg-red-500');
+                        pirDot.classList.add('bg-emerald-500');
+                    }
+
+                    // ALERT
+                    const alertBox = document.getElementById('alert-container');
+
+                    if (data.soil < 40) {
+                        // 🔴 KERING
+                        alertBox.innerHTML = `
+                            <p class="text-sm font-semibold text-red-600">⚠️ Tanah Kering!</p>
+                        `;
+                    } else if (data.soil <= 70) {
+                        // 🟢 LEMBAP / NORMAL
+                        alertBox.innerHTML = `
+                            <p class="text-sm font-semibold text-emerald-600">✅ Tanah Lembap (Normal)</p>
+                        `;
+                    } else {
+                        // 🔵 BASAH
+                        alertBox.innerHTML = `
+                            <p class="text-sm font-semibold text-blue-600">💧 Tanah Terlalu Basah!</p>
+                        `;
+                    }
+
+                    // === UPDATE CHART REALTIME ===
+                    const now = new Date();
+                    const timeLabel = now.getHours() + ":" + now.getMinutes();
+
+                    // push data baru
+                    soilData.push(soil);
+                    waterData.push(data.water ?? 0);
+                    labels.push(timeLabel);
+
+                    // batasi max 10 data
+                    if (soilData.length > 10) {
+                        soilData.shift();
+                        waterData.shift();
+                        labels.shift();
+                    }
+
+                    // update chart
+                    historyChart.data.labels = labels;
+                    historyChart.data.datasets[0].data = soilData;
+                    historyChart.data.datasets[1].data = waterData;
+                    historyChart.update();
+
+                } catch (error) {
+                    console.error("Error:", error);
+                }
+            }
+
+            async function getWeather() {
+                try {
+                    const apiKey = "b0d5f22ab03a678d718f8e688f35ef5a";
+
+                    function fetchWeather(lat, lon) {
+                        return fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=id&appid=${apiKey}`)
+                            .then(res => res.json());
+                    }
+
+                    function updateUI(data) {
+                        if (data.cod !== 200) {
+                            console.error("API ERROR:", data.message);
+                            return;
+                        }
+
+                        const temp = Math.round(data.main.temp);
+                        const humidity = data.main.humidity;
+                        const wind = data.wind.speed;
+                        const mainWeather = data.weather[0].main;
+                        const rawDesc = data.weather[0].description.toLowerCase();
+                        const desc = translateWeather(mainWeather.toLowerCase());
+
+                        document.getElementById("weather-temp").innerText =
+                            temp + "°C (" + mainWeather + " - " + desc + ")";
+                        document.getElementById("weather-humidity").innerText = humidity + "%";
+                        document.getElementById("weather-wind").innerText = wind + " km/h";
+                    }
+
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            async (position) => {
+                                const lat = position.coords.latitude;
+                                const lon = position.coords.longitude;
+
+                                const data = await fetchWeather(lat, lon);
+                                updateUI(data);
+                            },
+                            async (error) => {
+                                console.warn("Gagal ambil lokasi, pakai fallback Sumbersari");
+
+                                // 📍 fallback Sumbersari, Malang
+                                const lat = -7.9553;
+                                const lon = 112.6145;
+
+                                const data = await fetchWeather(lat, lon);
+                                updateUI(data);
+                            }
+                        );
+                    } else {
+                        console.warn("Browser tidak support geolocation");
+
+                        // fallback juga
+                        const data = await fetchWeather(-7.9553, 112.6145);
+                        updateUI(data);
+                    }
+
+                } catch (err) {
+                    console.error("Weather error:", err);
+                }
+            }
+
+            function translateWeather(desc) {
+                const kamus = {
+                    "clear": "Cerah",
+                    "clouds": "Berawan",
+                    "rain": "Hujan",
+                    "drizzle": "Gerimis",
+                    "thunderstorm": "Badai Petir",
+                    "snow": "Salju",
+                    "mist": "Berkabut",
+                    "fog": "Kabut"
+                };
+
+                return kamus[desc] || "Cuaca Tidak Diketahui";
+            }
+
+
+            getWeather();
+            setInterval(getWeather, 600000); // tiap 10 menit
     </script>
 </body>
 </html>
