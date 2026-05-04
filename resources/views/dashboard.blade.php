@@ -1,32 +1,29 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartOryza - Dashboard Monitor Profesional</title>
-    
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Chart.js for Graphical History -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>SmartOryza - Dashboard Monitor</title>
 
-    <!-- jsPDF & AutoTable untuk Generate Laporan PDF -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans:['"Plus Jakarta Sans"', 'sans-serif'],
-                        serif:['"Playfair Display"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif']
                     },
                     colors: {
                         brand: {
@@ -34,7 +31,7 @@
                             100: '#dcfce7',
                             500: '#22c55e',
                             700: '#15803d',
-                            900: '#2b5329', 
+                            900: '#2b5329'
                         }
                     }
                 }
@@ -43,899 +40,553 @@
     </script>
 
     <style>
-        body { background-color: #f8fafc; }
+        body {
+            background-color: #f8fafc;
+        }
+
         .glass-nav {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
         }
-        .stat-card { transition: all 0.2s ease-in-out; }
+
+        .stat-card {
+            transition: all 0.2s ease-in-out;
+        }
+
         .stat-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
         }
-        .progress-bar-animated { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
-        
-        /* Custom scrollbar for table */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; rounded-full; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .progress-bar-animated {
+            transition: width 0.5s ease-in-out;
+        }
     </style>
 </head>
+
 <body class="min-h-screen text-gray-800 antialiased pb-12">
 
-    <!-- Navbar -->
-    <nav class="glass-nav border-b border-gray-100 sticky top-0 z-50 py-4 px-6 md:px-10 flex justify-between items-center shadow-sm">
+    <nav
+        class="glass-nav border-b border-gray-100 sticky top-0 z-50 py-4 px-6 md:px-10 flex justify-between items-center shadow-sm">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-brand-900 rounded-xl flex items-center justify-center shadow-md">
                 <span class="text-xl text-white">🌾</span>
             </div>
-            <h1 class="text-2xl font-bold tracking-tight font-serif text-brand-900 hidden sm:block">
+            <h1 class="text-2xl font-bold tracking-tight font-serif text-brand-900">
                 Smart<span class="text-brand-500">Oryza</span>
             </h1>
         </div>
         <div class="flex items-center gap-5">
-            <div class="hidden md:block text-right">
-                <p class="text-sm font-semibold text-gray-800 capitalize">{{ Auth::user()->name ?? 'Petani Modern' }}</p>
-                <p class="text-xs text-gray-500" id="current-time">Loading time...</p>
+            <div class="text-right hidden sm:block">
+                <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name ?? 'Petani Modern' }}</p>
+                <p class="text-xs text-gray-500" id="current-time">Loading...</p>
             </div>
-            <div class="w-px h-8 bg-gray-200 hidden md:block"></div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="flex items-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-semibold transition-colors border border-red-100">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span class="hidden sm:inline">Keluar</span>
-                </button>
+                <button type="submit"
+                    class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold border border-red-100">Keluar</button>
             </form>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-6 md:px-10 py-8">
-        
-        <!-- Header & Global Actions -->
-        <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+
+        <div class="mb-8 flex flex-col md:flex-row justify-between gap-4">
             <div>
-                <h2 class="text-3xl font-bold text-gray-900 mb-1">Dashboard Irigasi</h2>
-                <p class="text-gray-500 font-medium">Monitoring real-time & riwayat aktivitas sistem IoT</p>
+                <h2 class="text-3xl font-bold text-gray-900">Monitoring Lahan Padi</h2>
+                <p class="text-gray-500">Sistem Otomasi Irigasi & Pengusir Hama</p>
             </div>
-            <div class="flex items-center gap-3 relative">
-                <div class="bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-xl flex items-center gap-3 shadow-sm" id="alert-container">
+            <div class="flex gap-3">
+                <div id="alert-container"
+                    class="bg-white border px-4 py-2 rounded-xl flex items-center gap-3 shadow-sm">
                     <span class="relative flex h-3 w-3">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                        <span id="system-dot-ping" class="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span id="system-dot" class="relative h-3 w-3 bg-emerald-500 rounded-full"></span>
                     </span>
-                    <p class="text-sm font-semibold text-emerald-700 hidden sm:block">Sistem Normal</p>
+                    <p id="system-status" class="text-sm font-bold text-emerald-700">Sistem Online</p>
                 </div>
-                
-                <!-- DROPDOWN UNDUH LAPORAN -->
-                <div class="relative group">
-                    <button id="main-btn-download" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all flex items-center gap-2 active:scale-95">
-                        <i class="fas fa-download" id="main-download-icon"></i>
-                        <span class="hidden sm:inline" id="main-download-text">Unduh Laporan</span>
-                        <i class="fas fa-chevron-down text-xs ml-1 text-gray-400"></i>
+                <button onclick="downloadPDF()"
+                    class="bg-brand-900 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md hover:bg-brand-700 transition-all">
+                    <i class="fas fa-file-pdf mr-2"></i>Laporan
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Siklus Tanam Padi (6 Bulan)</h3>
+                    <p class="text-sm text-gray-500" id="planting-status">Status: Belum Dimulai</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-gray-400 uppercase">Sisa Waktu</p>
+                        <p class="text-xl font-black text-brand-900" id="countdown-timer">-- Hari lagi</p>
+                    </div>
+                    <button id="btn-planting" onclick="togglePlanting()"
+                        class="bg-brand-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-brand-700 transition-all active:scale-95">
+                        Mulai Tanam
                     </button>
-                    <!-- Kotak Menu Dropdown -->
-                    <div class="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden transform origin-top-right group-hover:scale-100 scale-95">
-                        <div class="p-1">
-                            <button onclick="downloadCSV()" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700 rounded-lg flex items-center gap-3 transition-colors">
-                                <i class="fas fa-file-excel text-emerald-600 text-lg"></i> 
-                                <div>
-                                    <p class="font-bold">Format Excel</p>
-                                    <p class="text-xs text-gray-500 font-normal">Data mentah (.csv)</p>
-                                </div>
-                            </button>
-                            <button onclick="downloadPDF()" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 rounded-lg flex items-center gap-3 transition-colors mt-1">
-                                <i class="fas fa-file-pdf text-red-500 text-lg"></i> 
-                                <div>
-                                    <p class="font-bold">Format PDF</p>
-                                    <p class="text-xs text-gray-500 font-normal">Dokumen rapi (.pdf)</p>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
                 </div>
-                <!-- END DROPDOWN -->
-
-            </div>
-        </div>
-
-        <!-- FITUR BARU: TIMELINE MASA TANAM -->
-        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-6 relative overflow-hidden group">
-            <!-- Dekorasi Background -->
-            <div class="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-amber-50 to-transparent"></div>
-            
-            <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                        <i class="fas fa-calendar-alt text-brand-600"></i> Siklus Tanam Padi
-                    </h3>
-                    <p class="text-sm text-gray-500 font-medium">Estimasi Panen: 15 Juni 2026</p>
-                </div>
-                <div class="bg-amber-100 border border-amber-200 text-amber-800 px-4 py-2 rounded-xl text-sm font-bold shadow-sm flex items-center gap-2 animate-pulse">
-                    <i class="fas fa-exclamation-circle"></i>
-                    Fase Pengeringan (Pematangan)
-                </div>
-            </div>
-
-            <!-- Progress Bar Tracker -->
-            <div class="relative w-full h-3 bg-gray-100 rounded-full mt-6 mb-2 overflow-hidden flex">
-                <!-- Fase 4 Bulan Pertama (Irigasi) -->
-                <div class="h-full bg-brand-500 w-[66.6%] relative border-r-2 border-white"></div>
-                <!-- Fase 2 Bulan Terakhir (Pengeringan) -->
-                <div class="h-full bg-amber-400 w-[33.4%] relative">
-                    <!-- Indikator Posisi Saat ini (Titik Berjalan) -->
-                    <div class="absolute top-1/2 left-[40%] -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-white border-4 border-amber-600 rounded-full shadow-md z-20"></div>
-                </div>
-            </div>
-
-            <div class="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-wider">
-                <span>Mulai Tanam (Hari 1)</span>
-                <span class="text-brand-600 ml-16">Fase Vegetatif & Generatif</span>
-                <span class="text-amber-600">Stop Irigasi (Hari 120)</span>
-                <span>Panen (Hari 180)</span>
-            </div>
-
-            <!-- Analisis Ultrasonik Khusus Fase Ini -->
-            <div class="mt-5 pt-4 border-t border-gray-50 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500">
-                    <i class="fas fa-water"></i>
-                </div>
-                <p class="text-sm font-medium text-gray-600">
-                    <span class="font-bold text-red-600">Cek Ultrasonik:</span> Terdapat genangan air 12cm. Karena saat ini fase pengeringan, segera pastikan saluran pembuangan air sawah terbuka!
-                </p>
-            </div>
-        </div>
-
-        <!-- ROW 1: Quick Stats (4 Columns) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-
-            <!-- 1. Soil Moisture -->
-            <div class="stat-card bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative overflow-hidden">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                        <i class="fas fa-tint text-blue-500 text-lg"></i>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-1 rounded-md">V1</span>
-                </div>
-                <p class="text-sm font-medium text-gray-500">Kelembapan Tanah</p>
-                <div class="flex items-baseline gap-1 mt-1">
-                    <h3 class="text-4xl font-extrabold text-gray-900" id="soil-value">68</h3>
-                    <span class="text-lg font-semibold text-gray-500">%</span>
-                </div>
-                <div class="mt-5 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-blue-500 progress-bar-animated w-[68%]" id="soil-bar"></div>
-                </div>
-            </div>
-
-            <!-- 2. Water Level -->
-            <div class="stat-card bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="w-10 h-10 rounded-full bg-cyan-50 flex items-center justify-center">
-                        <i class="fas fa-water text-cyan-500 text-lg"></i>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-1 rounded-md">V2</span>
-                </div>
-                <p class="text-sm font-medium text-gray-500">Jarak Permukaan Air</p>
-                <div class="flex items-baseline gap-1 mt-1">
-                    <h3 class="text-4xl font-extrabold text-gray-900" id="distance">45</h3>
-                    <span class="text-lg font-semibold text-gray-500">cm</span>
-                </div>
-                <p class="text-xs text-gray-400 mt-4"><i class="fas fa-arrow-up text-emerald-500 mr-1"></i> Naik 2cm dari kemarin</p>
-            </div>
-
-            <!-- 3. PIR Detection -->
-            <div class="stat-card bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center">
-                        <i class="fas fa-walking text-orange-500 text-lg"></i>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-1 rounded-md">V3</span>
-                </div>
-                <p class="text-sm font-medium text-gray-500">Deteksi Hama (PIR)</p>
-                <div class="mt-3 flex items-center gap-3">
-                    <span class="relative flex h-4 w-4">
-                        <span id="pir-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span id="pir-dot" class="relative inline-flex rounded-full h-4 w-4 bg-emerald-500"></span>
-                    </span>
-                    <h3 class="text-xl font-bold text-emerald-600" id="pir-status">Aman</h3>
-                </div>
-                <p class="text-xs text-gray-400 mt-4">Terakhir terdeteksi: 12:45 WIB</p>
-            </div>
-
-            <!-- 4. Weather Widget -->
-            <div class="stat-card bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-6 shadow-md text-white relative overflow-hidden">
-                <div class="absolute -right-4 -top-4 text-white/20 text-6xl"><i class="fas fa-cloud-sun"></i></div>
-                <div class="relative z-10">
-                    <p class="text-sm font-medium text-blue-100 mb-1">Cuaca Sawah Saat Ini</p>
-                    <div class="flex items-center gap-3 mt-2">
-                        <i class="fas fa-cloud-sun text-4xl text-yellow-300"></i>
-                        <h3 class="text-4xl font-extrabold">
-                            <span id="weather-temp">--°C</span>
-                        </h3>
-                    </div>
-                    <div class="mt-4 flex gap-4 text-xs text-blue-100 font-medium">
-                        <span id="weather-humidity">--%</span>
-                        <span id="weather-wind">-- km/h</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ROW 2: Charts & Controls -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            
-            <!-- Graphical History Chart -->
-            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm lg:col-span-2">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-900">Grafik Kelembapan & Air</h3>
-                        <p class="text-sm text-gray-500">Data 7 hari terakhir</p>
-                    </div>
-                    <select class="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-brand-500 focus:border-brand-500 block p-2 outline-none">
-                        <option>Minggu Ini</option>
-                        <option>Bulan Ini</option>
-                    </select>
-                </div>
-                <div class="relative h-64 w-full">
-                    <canvas id="historyChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Control Panels -->
-            <div class="space-y-6">
-                <!-- System Mode -->
-                <div class="bg-brand-900 rounded-2xl p-6 shadow-md text-white relative overflow-hidden">
-                    <div class="flex justify-between items-center relative z-10">
+                <div id="dry-phase-alert"
+                    class="hidden bg-amber-50 border-l-4 border-amber-500 p-4 mb-6 rounded-r-xl shadow-sm animate-pulse">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-exclamation-triangle text-amber-600 text-xl"></i>
                         <div>
-                            <p class="text-sm font-medium text-brand-100">Mode Sistem</p>
-                            <h3 class="text-2xl font-bold mt-1">OTOMATIS</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                            <i class="fas fa-microchip text-xl text-white"></i>
+                            <p class="text-amber-800 font-bold">Peringatan: Fase Pengeringan (Bulan ke-5 & 6)</p>
+                            <p class="text-amber-700 text-xs">Pastikan saluran irigasi ditutup untuk pematangan bulir padi.</p>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Pump Control -->
-                <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center" id="pump-icon-bg">
-                                <i class="fas fa-faucet text-blue-500"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-md font-bold text-gray-900">Pompa Air</h3>
-                                <p class="text-xs text-gray-500" id="pump-text">Status: MATI</p>
-                            </div>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="pump-switch" class="sr-only peer" onchange="togglePump()">
-                            <div class="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
-                        </label>
-                    </div>
+            <div class="mt-6">
+                <div class="flex justify-between text-xs font-bold mb-2">
+                    <span id="start-date-label">Tgl Mulai: -</span>
+                    <span id="progress-percent">0%</span>
+                    <span id="end-date-label">Estimasi Panen: -</span>
                 </div>
-
-                <!-- Scarecrow Control -->
-                <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center">
-                                <span class="text-xl" id="scarecrow-emoji">🦅</span>
-                            </div>
-                            <div>
-                                <h3 class="text-md font-bold text-gray-900">Pengusir Hama</h3>
-                                <p class="text-xs text-gray-500" id="scarecrow-text">Status: NONAKTIF</p>
-                            </div>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="scarecrow-switch" class="sr-only peer" onchange="toggleScarecrow()">
-                            <div class="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
-                        </label>
-                    </div>
+                <div class="w-full h-4 bg-gray-100 rounded-full overflow-hidden">
+                    <div id="planting-progress-bar" class="h-full bg-brand-500 transition-all duration-1000"
+                        style="width: 0%"></div>
                 </div>
             </div>
         </div>
 
-        <!-- ROW 3: Data Table (Riwayat Aktivitas) -->
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-900">Riwayat Aktivitas Sistem</h3>
-                    <p class="text-sm text-gray-500">Log kejadian dan aktuasi perangkat harian</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <p class="text-sm font-medium text-gray-500 mb-2">Kelembapan Tanah</p>
+                <div class="flex items-baseline gap-1">
+                    <h3 class="text-4xl font-extrabold text-gray-900" id="soil-value">0</h3>
+                    <span class="text-lg text-gray-500 font-bold">%</span>
+                </div>
+                <div class="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div id="soil-bar" class="h-full bg-blue-500 progress-bar-animated w-0"></div>
                 </div>
             </div>
-            <div class="overflow-x-auto">
-                <table id="logTable" class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
-                            <th class="px-6 py-4 font-semibold">Waktu</th>
-                            <th class="px-6 py-4 font-semibold">Perangkat / Sensor</th>
-                            <th class="px-6 py-4 font-semibold">Deskripsi Aktivitas</th>
-                            <th class="px-6 py-4 font-semibold text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 text-sm text-gray-700" id="activity-log-body">
-                        <!-- Default Rows -->
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 font-medium text-gray-900">Hari ini, 12:45</td>
-                            <td class="px-6 py-4 flex items-center gap-2"><i class="fas fa-walking text-orange-500"></i> Sensor PIR</td>
-                            <td class="px-6 py-4">Mendeteksi pergerakan burung di Sektor Utara</td>
-                            <td class="px-6 py-4 text-center"><span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">Peringatan</span></td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 font-medium text-gray-900">Hari ini, 08:00</td>
-                            <td class="px-6 py-4 flex items-center gap-2"><i class="fas fa-faucet text-blue-500"></i> Pompa Air</td>
-                            <td class="px-6 py-4">Pompa dimatikan (Kelembapan mencapai target 70%)</td>
-                            <td class="px-6 py-4 text-center"><span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">Sukses</span></td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 font-medium text-gray-900">Hari ini, 07:15</td>
-                            <td class="px-6 py-4 flex items-center gap-2"><i class="fas fa-faucet text-blue-500"></i> Pompa Air</td>
-                            <td class="px-6 py-4">Pompa dihidupkan otomatis (Kelembapan drop 45%)</td>
-                            <td class="px-6 py-4 text-center"><span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">Sukses</span></td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 font-medium text-gray-900">Kemarin, 18:30</td>
-                            <td class="px-6 py-4 flex items-center gap-2"><i class="fas fa-wifi text-gray-400"></i> Sistem IoT</td>
-                            <td class="px-6 py-4">Kalibrasi sensor ultrasonik V2 selesai</td>
-                            <td class="px-6 py-4 text-center"><span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">Info</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+
+            <div class="stat-card bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+    <div class="flex justify-between items-start mb-2">
+        <p class="text-sm font-medium text-gray-500">Irigasi (Pintu Air)</p>
+        <span id="servo1-badge"
+            class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-400">OTOMATIS</span>
+    </div>
+    <div class="flex items-baseline gap-1">
+        <h3 class="text-4xl font-extrabold text-gray-900" id="distance">0</h3>
+        <span class="text-lg text-gray-500 font-bold">cm</span>
+    </div>
+    <p class="text-xs text-gray-400 mt-2 italic">D1 Irigasi</p>
+
+    <div class="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
+        <span class="text-xs font-bold text-gray-400">MODE:</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="mode-toggle" class="sr-only peer" onchange="toggleMode()">
+            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+            <span class="ml-2 text-[10px] font-bold text-gray-500" id="mode-label">Otomatis</span>
+        </label>
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between" id="manual-control-section">
+        <span class="text-xs font-bold text-gray-400">KONTROL MANUAL:</span>
+        <div class="flex gap-2">
+            <button id="btn-buka" onclick="controlServo(1)"
+                class="px-3 py-1 bg-blue-400 text-white text-[10px] font-bold rounded cursor-not-allowed opacity-50" disabled>BUKA</button>
+            <button id="btn-tutup" onclick="controlServo(2)"
+                class="px-3 py-1 bg-gray-400 text-white text-[10px] font-bold rounded cursor-not-allowed opacity-50" disabled>TUTUP</button>
+        </div>
+    </div>
+</div>
+
+            <div class="stat-card bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <div class="flex justify-between items-start mb-2">
+                    <p class="text-sm font-medium text-gray-500">Hama (Sensor 2)</p>
+                    <span id="servo2-badge"
+                        class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-400">IDLE</span>
+                </div>
+                <div class="flex items-center gap-3 mt-1">
+                    <span id="pir-dot" class="h-4 w-4 rounded-full bg-emerald-500"></span>
+                    <h3 class="text-2xl font-bold text-emerald-600" id="pir-status">Aman</h3>
+                </div>
+                <p id="scarecrow-alert" class="hidden text-sm text-red-600 font-bold mt-2">Scarecrow Aktif</p>
+                <p class="text-xs text-gray-400 mt-3 italic" id="hama-val">Jarak: 0 cm</p>
+
+                <div class="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
+                    <span class="text-xs font-bold text-gray-400">PENGUSIR MANUAL:</span>
+                    <div class="flex gap-2">
+                        <button onclick="controlScarecrow(1)"
+                            class="px-3 py-1 bg-red-500 text-white text-[10px] font-bold rounded hover:bg-red-600">TRIGGER</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card bg-brand-900 rounded-2xl p-6 shadow-md text-white">
+                <p class="text-sm font-medium text-brand-100 mb-2">Mode Operasi</p>
+                <h3 class="text-2xl font-bold">OTOMATIS</h3>
+                <div class="mt-4 flex items-center gap-2 text-xs text-brand-100">
+                    <i class="fas fa-microchip"></i>
+                    <span id="esp32-status">ESP32 Aktif</span>
+                </div>
             </div>
         </div>
 
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <h3 class="font-bold mb-4 text-gray-700"><i class="fas fa-chart-line mr-2"></i>Grafik Kelembapan & Air</h3>
+                <div class="h-64"><canvas id="historyChart"></canvas></div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+                <h3 class="font-bold mb-4 text-gray-700"><i class="fas fa-history mr-2"></i>Aktivitas Terbaru</h3>
+                <div class="overflow-y-auto flex-1 h-64 text-sm space-y-3" id="log-container">
+                    <p class="text-gray-400 italic">Menunggu transmisi data...</p>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import {
+        initializeApp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+        getDatabase,
+        ref,
+        onValue,
+        set,
+        get
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        const firebaseConfig = {
-            databaseURL: "https://smartoryza-default-rtdb.asia-southeast1.firebasedatabase.app"
-        };
+    // 1. KONFIGURASI FIREBASE
+    const firebaseConfig = {
+        databaseURL: "https://smartoryza-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const userId = "1";
-        const deviceId = "A1";
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-        const sensorRef = ref(db, `users/${userId}/devices/${deviceId}/latest`);
+    // 2. SETUP CHART (GRAFIK)
+    const ctx = document.getElementById('historyChart').getContext('2d');
+    let soilData = [];
+    let waterData = [];
+    let labels = [];
 
-        onValue(sensorRef, (snapshot) => {
-            const data = snapshot.val();
+    const historyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                    label: 'Soil (%)',
+                    data: soilData,
+                    borderColor: '#3b82f6',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)'
+                },
+                {
+                    label: 'Water (cm)',
+                    data: waterData,
+                    borderColor: '#22c55e',
+                    tension: 0.4,
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
 
-            if (!data) return;
+    // 3. FUNGSI KONTROL MANUAL
+    window.controlServo = function(status) {
+        fetch('/api/control/servo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                },
+                body: JSON.stringify({
+                    status: status
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Control sent:", data);
+                const statusLabel = status === 1 ? "DIBUKA" : "DITUTUP";
+                alert("Pintu Air Berhasil " + statusLabel + " secara manual.");
+            })
+            .catch(err => console.error("Error sending control:", err));
+    };
 
-            // SOIL
-            const soil = data.soil ?? 0;
-            document.getElementById('soil-value').innerText = soil;
-            document.getElementById('soil-bar').style.width = soil + "%";
+    window.controlScarecrow = function(status) {
+        const scarecrowRef = ref(db, 'iot/control/scarecrow');
+        set(scareRef, status)
+            .then(() => {
+                alert("Perintah pengusir hama berhasil dikirim ke ESP32!");
+            })
+            .catch(err => console.error("Error sending scarecrow control:", err));
+    };
 
-            // WATER
-            document.getElementById('distance').innerText = data.water ?? 0;
+    window.toggleMode = function() {
+        const toggle = document.getElementById('mode-toggle');
+        const label = document.getElementById('mode-label');
+        const badge = document.getElementById('servo1-badge');
+        const btnBuka = document.getElementById('btn-buka');
+        const btnTutup = document.getElementById('btn-tutup');
 
-            // PIR
-            const pirStatus = document.getElementById('pir-status');
-            const pirDot = document.getElementById('pir-dot');
+        const isManual = toggle.checked;
 
-            const status = (data.pir || "").toLowerCase();
-            pirStatus.innerText = data.pir ?? "-";
+        if (isManual) {
+            label.innerText = 'Manual';
+            badge.innerText = 'MANUAL';
+            badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-600';
 
-            if (status === "bahaya") {
-                pirStatus.classList.remove('text-emerald-600');
-                pirStatus.classList.add('text-red-600');
-                pirDot.classList.remove('bg-emerald-500');
-                pirDot.classList.add('bg-red-500');
+            btnBuka.disabled = false;
+            btnBuka.classList.remove('bg-blue-400', 'cursor-not-allowed', 'opacity-50');
+            btnBuka.classList.add('bg-blue-500', 'hover:bg-blue-600');
+
+            btnTutup.disabled = false;
+            btnTutup.classList.remove('bg-gray-400', 'cursor-not-allowed', 'opacity-50');
+            btnTutup.classList.add('bg-gray-500', 'hover:bg-gray-600');
+
+            controlServo(2); // Default ke Tutup
+        } else {
+            label.innerText = 'Otomatis';
+            badge.innerText = 'OTOMATIS';
+            badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-400';
+
+            btnBuka.disabled = true;
+            btnBuka.classList.add('bg-blue-400', 'cursor-not-allowed', 'opacity-50');
+            btnBuka.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+
+            btnTutup.disabled = true;
+            btnTutup.classList.add('bg-gray-400', 'cursor-not-allowed', 'opacity-50');
+            btnTutup.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+
+            controlServo(0); // Kembali ke Otomatis
+        }
+    };
+
+    // 4. LOGIKA MASA TANAM & NOTIFIKASI PENGERINGAN
+    window.togglePlanting = async function() {
+        const plantingRef = ref(db, 'iot/planting_cycle');
+        const snapshot = await get(plantingRef);
+        const data = snapshot.val();
+
+        if (!data || !data.is_active) {
+            const startTime = new Date().getTime();
+            set(plantingRef, {
+                is_active: true,
+                start_timestamp: startTime
+            });
+            alert("Masa tanam dimulai! Estimasi panen adalah 6 bulan dari sekarang.");
+        } else {
+            if (confirm("Apakah Anda yakin ingin menyelesaikan masa tanam ini?")) {
+                set(plantingRef, {
+                    is_active: false,
+                    start_timestamp: 0
+                });
+            }
+        }
+    };
+
+    // Listener Masa Tanam & Notifikasi Fase Pengeringan
+    onValue(ref(db, 'iot/planting_cycle'), (snapshot) => {
+        const data = snapshot.val();
+        const btn = document.getElementById('btn-planting');
+        const alertBox = document.getElementById('dry-phase-alert');
+
+        if (data && data.is_active) {
+            btn.innerText = "Selesaikan Masa Tanam";
+            btn.className = "bg-red-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg";
+
+            const start = new Date(data.start_timestamp);
+            const end = new Date(start);
+            end.setMonth(start.getMonth() + 6);
+
+            const now = new Date();
+            const totalDuration = end - start;
+            const timePassed = now - start;
+
+            let percent = Math.floor((timePassed / totalDuration) * 100);
+            percent = Math.min(Math.max(percent, 0), 100);
+
+            const diffDays = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+            const monthsPassed = Math.floor(timePassed / (1000 * 60 * 60 * 24 * 30));
+
+            if (monthsPassed >= 4 && percent < 100) {
+                alertBox.classList.remove('hidden');
             } else {
-                pirStatus.classList.remove('text-red-600');
-                pirStatus.classList.add('text-emerald-600');
-                pirDot.classList.remove('bg-red-500');
-                pirDot.classList.add('bg-emerald-500');
+                alertBox.classList.add('hidden');
             }
 
-            // === CHART REALTIME ===
+            document.getElementById('planting-status').innerText = "Status: Berlangsung";
+            document.getElementById('countdown-timer').innerText = diffDays > 0 ? diffDays + " Hari Lagi" : "Waktunya Panen!";
+            document.getElementById('planting-progress-bar').style.width = percent + "%";
+            document.getElementById('progress-percent').innerText = percent + "%";
+            document.getElementById('start-date-label').innerText = "Mulai: " + start.toLocaleDateString('id-ID');
+            document.getElementById('end-date-label').innerText = "Panen: " + end.toLocaleDateString('id-ID');
+
+        } else {
+            btn.innerText = "Mulai Masa Tanam";
+            btn.className = "bg-brand-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg";
+            document.getElementById('planting-status').innerText = "Status: Belum Dimulai";
+            document.getElementById('countdown-timer').innerText = "-- Hari";
+            document.getElementById('planting-progress-bar').style.width = "0%";
+            alertBox.classList.add('hidden');
+        }
+    });
+
+    // 5. LISTEN DATA SENSOR (REAL-TIME)
+    onValue(ref(db, 'iot/latest'), (snapshot) => {
+        const data = snapshot.val();
+        const esp32Status = document.getElementById('esp32-status');
+        const servo2Badge = document.getElementById('servo2-badge');
+
+        if (data && data.soil !== undefined && data.water !== undefined) {
+            esp32Status.innerText = "ESP32 Aktif";
+
+            document.getElementById('soil-value').innerText = data.soil;
+            document.getElementById('soil-bar').style.width = data.soil + "%";
+            document.getElementById('distance').innerText = data.water;
+
+            const pirStatus = document.getElementById('pir-status');
+            const pirDot = document.getElementById('pir-dot');
+            const scarecrowAlert = document.getElementById('scarecrow-alert');
+            const status = (data.pir || "").toLowerCase();
+
+            if (status === "bahaya") {
+                pirStatus.innerText = "BAHAYA";
+                pirStatus.className = "text-2xl font-bold text-red-600";
+                pirDot.className = "h-4 w-4 rounded-full bg-red-600 animate-pulse";
+                scarecrowAlert.classList.remove('hidden');
+
+                servo2Badge.innerText = "AKTIF / BAHAYA";
+                servo2Badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600";
+            } else {
+                pirStatus.innerText = "AMAN";
+                pirStatus.className = "text-2xl font-bold text-emerald-600";
+                pirDot.className = "h-4 w-4 rounded-full bg-emerald-500";
+                scarecrowAlert.classList.add('hidden');
+
+                servo2Badge.innerText = "IDLE / AMAN";
+                servo2Badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-400";
+            }
+
+            // Update Chart
             const now = new Date();
-            const timeLabel = now.getHours() + ":" + now.getMinutes();
+            const timeStr = now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0');
+            soilData.push(data.soil);
+            waterData.push(data.water);
+            labels.push(timeStr);
 
-            soilData.push(soil);
-            waterData.push(data.water ?? 0);
-            labels.push(timeLabel);
-
-            if (soilData.length > 10) {
+            if (labels.length > 10) {
                 soilData.shift();
                 waterData.shift();
                 labels.shift();
             }
-
-            historyChart.data.labels = labels;
-            historyChart.data.datasets[0].data = soilData;
-            historyChart.data.datasets[1].data = waterData;
             historyChart.update();
-        });
-        
-        // Update Time
-        function updateTime() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-            document.getElementById('current-time').textContent = now.toLocaleDateString('id-ID', options);
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
 
-        // Chart.js Configuration
-        const ctx = document.getElementById('historyChart').getContext('2d');
-        let soilData = [];
-        let waterData = [];
-        let labels = [];
-        const gradientBlue = ctx.createLinearGradient(0, 0, 0, 400);
-        gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
-        gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
-
-        const gradientGreen = ctx.createLinearGradient(0, 0, 0, 400);
-        gradientGreen.addColorStop(0, 'rgba(34, 197, 94, 0.5)');
-        gradientGreen.addColorStop(1, 'rgba(34, 197, 94, 0.0)');
-
-        const historyChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels:['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
-                datasets:[
-                    {
-                        label: 'Kelembapan Tanah (%)',
-                        data:[],
-                        borderColor: '#3b82f6',
-                        backgroundColor: gradientBlue,
-                        borderWidth: 3,
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#ffffff',
-                        pointBorderColor: '#3b82f6',
-                        pointBorderWidth: 2,
-                        pointRadius: 4
-                    },
-                    {
-                        label: 'Level Air (cm)',
-                        data:[28, 48, 40, 19, 86, 27, 45],
-                        borderColor: '#22c55e',
-                        backgroundColor: gradientGreen,
-                        borderWidth: 3,
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#ffffff',
-                        pointBorderColor: '#22c55e',
-                        pointBorderWidth: 2,
-                        pointRadius: 4
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600' } } }
-                },
-                scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f1f5f9' }, border: { display: false } },
-                    x: { grid: { display: false }, border: { display: false } }
-                },
-                interaction: { mode: 'index', intersect: false },
-            }
-        });
-
-        // System Controls
-        function addLogEntry(deviceIcon, deviceColor, deviceName, activity) {
-            const tbody = document.getElementById('activity-log-body');
-            const now = new Date();
-            const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-            
-            const newRow = document.createElement('tr');
-            newRow.className = "bg-green-50/50 hover:bg-gray-50 transition-colors";
-            newRow.innerHTML = `
-                <td class="px-6 py-4 font-medium text-gray-900">Baru saja, ${timeString}</td>
-                <td class="px-6 py-4 flex items-center gap-2"><i class="fas ${deviceIcon} ${deviceColor}"></i> ${deviceName}</td>
-                <td class="px-6 py-4">${activity}</td>
-                <td class="px-6 py-4 text-center"><span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">Manual</span></td>
+            // Update Logs
+            const logContainer = document.getElementById('log-container');
+            const newLog = document.createElement('div');
+            newLog.className = "p-3 bg-gray-50 rounded-lg border-l-4 " + (status === 'bahaya' ? 'border-red-500' : 'border-emerald-500');
+            newLog.innerHTML = `
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-bold text-xs text-gray-500">${timeStr}</span>
+                    <span class="text-[10px] uppercase font-bold ${status === 'bahaya' ? 'text-red-500' : 'text-emerald-500'}">${status}</span>
+                </div>
+                <p class="text-xs">Soil: ${data.soil}%, Air: ${data.water}cm</p>
             `;
-            
-            tbody.insertBefore(newRow, tbody.firstChild);
-            setTimeout(() => { newRow.classList.remove('bg-green-50/50'); }, 2000);
+            logContainer.prepend(newLog);
+            if (logContainer.children.length > 5) logContainer.lastChild.remove();
+
+        } else {
+            esp32Status.innerText = "ESP32 Tidak Aktif";
+            document.getElementById('soil-value').innerText = "-";
+            document.getElementById('soil-bar').style.width = "0%";
+            document.getElementById('distance').innerText = "-";
+            document.getElementById('pir-status').innerText = "-";
+            document.getElementById('pir-dot').className = "h-4 w-4 rounded-full bg-gray-400";
+            document.getElementById('scarecrow-alert').classList.add('hidden');
+            document.getElementById('hama-val').innerText = "Jarak: - cm";
+
+            servo2Badge.innerText = "OFFLINE";
+            servo2Badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-400";
         }
 
-        function togglePump() {
-            const isChecked = document.getElementById('pump-switch').checked;
-            const text = document.getElementById('pump-text');
-            const iconBg = document.getElementById('pump-icon-bg');
+        const systemStatus = document.getElementById('system-status');
+        const systemDotPing = document.getElementById('system-dot-ping');
+        const systemDot = document.getElementById('system-dot');
+        const alertContainer = document.getElementById('alert-container');
 
-            if (isChecked) {
-                text.textContent = "Status: AKTIF";
-                text.classList.add('text-blue-600', 'font-bold');
-                iconBg.classList.add('animate-pulse', 'ring-4', 'ring-blue-100');
-                addLogEntry('fa-faucet', 'text-blue-500', 'Pompa Air', 'Dihidupkan secara manual lewat Dashboard');
-            } else {
-                text.textContent = "Status: MATI";
-                text.classList.remove('text-blue-600', 'font-bold');
-                iconBg.classList.remove('animate-pulse', 'ring-4', 'ring-blue-100');
-                addLogEntry('fa-faucet', 'text-blue-500', 'Pompa Air', 'Dimatikan secara manual lewat Dashboard');
-            }
+        if (data && data.soil !== undefined && data.water !== undefined) {
+            systemStatus.innerText = "Sistem Online";
+            systemStatus.className = "text-sm font-bold text-emerald-700";
+            systemDotPing.className = "animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75";
+            systemDot.className = "relative h-3 w-3 bg-emerald-500 rounded-full";
+            alertContainer.className = "bg-white border px-4 py-2 rounded-xl flex items-center gap-3 shadow-sm";
+        } else {
+            systemStatus.innerText = "Sistem Offline";
+            systemStatus.className = "text-sm font-bold text-red-700";
+            systemDotPing.className = "animate-ping absolute h-full w-full rounded-full bg-red-400 opacity-75";
+            systemDot.className = "relative h-3 w-3 bg-red-500 rounded-full";
+            alertContainer.className = "bg-red-50 border border-red-200 px-4 py-2 rounded-xl flex items-center gap-3 shadow-sm";
         }
+    });
 
-        function toggleScarecrow() {
-            const isChecked = document.getElementById('scarecrow-switch').checked;
-            const text = document.getElementById('scarecrow-text');
-            const emoji = document.getElementById('scarecrow-emoji');
+    setInterval(() => {
+        document.getElementById('current-time').innerText = new Date().toLocaleString('id-ID', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }, 1000);
+</script>
 
-            if (isChecked) {
-                text.textContent = "Status: AKTIF";
-                text.classList.add('text-brand-600', 'font-bold');
-                emoji.classList.add('animate-bounce');
-                addLogEntry('fa-crow', 'text-amber-500', 'Pengusir Hama', 'Diaktifkan paksa (Manual Override)');
-            } else {
-                text.textContent = "Status: NONAKTIF";
-                text.classList.remove('text-brand-600', 'font-bold');
-                emoji.classList.remove('animate-bounce');
-                addLogEntry('fa-crow', 'text-amber-500', 'Pengusir Hama', 'Dinonaktifkan secara manual');
-            }
-        }
-
-        // ============================================
-        // DOWNLOAD REPORTS (CSV & PDF)
-        // ============================================
-
-        function animateDownloadButton() {
-            const btnIcon = document.getElementById('main-download-icon');
-            const btnText = document.getElementById('main-download-text');
-            
-            btnIcon.className = "fas fa-spinner fa-spin text-brand-600";
-            btnText.textContent = "Memproses...";
-            
-            return { btnIcon, btnText };
-        }
-
-        function restoreDownloadButton(btnIcon, btnText) {
-            btnIcon.className = "fas fa-check text-emerald-500";
-            btnText.textContent = "Selesai!";
-            
-            setTimeout(() => {
-                btnIcon.className = "fas fa-download";
-                btnText.textContent = "Unduh Laporan";
-            }, 2000);
-        }
-
-        function getFormattedDate() {
-            const d = new Date();
-            return `${d.getFullYear()}${(d.getMonth()+1).toString().padStart(2, '0')}${d.getDate().toString().padStart(2, '0')}`;
-        }
-
-        // 1. Download CSV
-        function downloadCSV() {
-            const { btnIcon, btnText } = animateDownloadButton();
-
-            setTimeout(() => {
-                const rows = document.querySelectorAll('#activity-log-body tr');
-                let csvContent = "Waktu Aktivitas,Perangkat/Sensor,Deskripsi Aktivitas,Status\n";
-
-                rows.forEach(row => {
-                    const cols = row.querySelectorAll('td');
-                    if (cols.length > 0) {
-                        const waktu = cols[0].innerText.replace(/,/g, ' -').trim();
-                        const perangkat = cols[1].innerText.trim();
-                        const aktivitas = cols[2].innerText.trim();
-                        const status = cols[3].innerText.trim();
-                        csvContent += `"${waktu}","${perangkat}","${aktivitas}","${status}"\n`;
-                    }
-                });
-
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                link.setAttribute("href", URL.createObjectURL(blob));
-                link.setAttribute("download", `Laporan_SmartOryza_${getFormattedDate()}.csv`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                restoreDownloadButton(btnIcon, btnText);
-            }, 800);
-        }
-
-// 2. Download PDF Laporan Lengkap (Executive Summary)
+    <script>
         function downloadPDF() {
-            const { btnIcon, btnText } = animateDownloadButton();
+            const {
+                jsPDF
+            } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(18);
+            doc.text("Laporan SmartOryza IoT", 14, 20);
+            doc.setFontSize(10);
+            doc.text("Dicetak pada: " + new Date().toLocaleString(), 14, 28);
 
-            setTimeout(() => {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'mm', 'a4'); // Kertas A4
-                let currentY = 0;
+            const soil = document.getElementById('soil-value').innerText;
+            const water = document.getElementById('distance').innerText;
+            const status = document.getElementById('pir-status').innerText;
 
-                // ==========================================
-                // HALAMAN 1: EXECUTIVE SUMMARY
-                // ==========================================
+            doc.autoTable({
+                startY: 35,
+                head: [
+                    ['Parameter Sensor', 'Nilai Real-time']
+                ],
+                body: [
+                    ['Kelembapan Tanah', soil + ' %'],
+                    ['Tinggi Air (Sensor 1)', water + ' cm'],
+                    ['Status Hama (Sensor 2)', status],
+                    ['Kondisi Sistem', 'NORMAL / ONLINE']
+                ],
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [34, 197, 94]
+                }
+            });
 
-                // --- KOP SURAT ---
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(18);
-                doc.setTextColor(43, 83, 41); // Forest Green
-                doc.text("Laporan Analitik Sistem SmartOryza", 14, 22);
-                
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(10);
-                doc.setTextColor(100, 100, 100);
-                const dateString = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                doc.text(`Periode Laporan: 7 Hari Terakhir  |  Dicetak: ${dateString}`, 14, 28);
-                
-                doc.setDrawColor(200, 200, 200);
-                doc.line(14, 32, 196, 32); // Garis pemisah
-
-                // --- 1. RINGKASAN IRIGASI ---
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(12);
-                doc.setTextColor(20, 20, 20);
-                doc.text("1. Ringkasan Irigasi & Pompa Air", 14, 42);
-                
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(10);
-                doc.setTextColor(60, 60, 60);
-                doc.text("• Total Durasi Pompa Menyala : 42 Jam 15 Menit", 18, 48);
-                doc.text("• Estimasi Volume Air Keluar : 14.500 Liter", 18, 54);
-                doc.text("• Rata-rata Irigasi Harian   : 2.071 Liter / Hari", 18, 60);
-
-                // --- 2. RATA-RATA SENSOR LINGKUNGAN ---
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(12);
-                doc.setTextColor(20, 20, 20);
-                doc.text("2. Pantauan Kondisi Lahan (Data Sensor)", 14, 72);
-
-                doc.autoTable({
-                    startY: 76,
-                    head: [['Indikator', 'Nilai Tertinggi', 'Nilai Terendah', 'Rata-rata Harian']],
-                    body: [['Kelembapan Tanah', '85% (Rabu)', '42% (Senin)', '68% (Optimal)'],['Suhu Udara', '34°C (Siang)', '24°C (Malam)', '28°C (Normal)'],
-                        ['Level Genangan Air', '50 cm', '15 cm', '32 cm']
-                    ],
-                    theme: 'grid',
-                    headStyles: { fillColor:[43, 83, 41] }, // Hijau Tema
-                    margin: { left: 14, right: 14 }
-                });
-
-                currentY = doc.lastAutoTable.finalY + 12;
-
-                // --- 3. ANALISIS GANGGUAN HAMA ---
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(12);
-                doc.setTextColor(20, 20, 20);
-                doc.text("3. Analisis Gangguan Hama (Sensor PIR)", 14, currentY);
-                
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(10);
-                doc.setTextColor(60, 60, 60);
-                doc.text("• Total Deteksi Pergerakan   : 28 Kali dalam seminggu", 18, currentY + 6);
-                doc.text("• Jam Rawan Hama Burung      : 05:30 - 07:00 WIB & 16:30 - 18:00 WIB", 18, currentY + 12);
-                doc.text("• Status Pengusir Hama       : Bekerja Normal (Otomatis aktuasi)", 18, currentY + 18);
-
-                currentY += 30;
-
-                // --- 4. CATATAN KERUSAKAN / ERROR LOG ---
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(12);
-                doc.setTextColor(20, 20, 20);
-                doc.text("4. Catatan Pemeliharaan & Error Sistem", 14, currentY);
-
-                doc.autoTable({
-                    startY: currentY + 4,
-                    head: [['Tanggal / Jam', 'Komponen', 'Status / Keterangan Error']],
-                    body:[['16 April 2026, 02:15', 'Koneksi WiFi', 'Koneksi ke server terputus 15 menit (Auto-reconnect: Sukses)'],['15 April 2026, 10:00', 'Sensor V2 (Air)', 'Kalibrasi ulang jarak ultrasonik dilakukan oleh Petani.'],['12 April 2026, 14:30', 'Pompa Air V4', 'Suhu mesin pompa memanas. Mati otomatis untuk pendinginan.']
-                    ],
-                    theme: 'grid',
-                    headStyles: { fillColor:[220, 38, 38] }, // Merah untuk log error
-                    margin: { left: 14, right: 14 }
-                });
-
-
-                // ==========================================
-                // HALAMAN 2: LOG AKTIVITAS (Tabel HTML)
-                // ==========================================
-                doc.addPage(); // Tambah Halaman Baru
-
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(14);
-                doc.setTextColor(43, 83, 41);
-                doc.text("Lampiran: Log Aktivitas Sistem Detail", 14, 20);
-                
-                // Ambil tabel HTML yang ada di dashboard
-                doc.autoTable({
-                    html: '#logTable',
-                    startY: 26,
-                    theme: 'striped',
-                    headStyles: { fillColor:[71, 85, 105] }, // Abu-abu profesional
-                    styles: { fontSize: 9, cellPadding: 3 },
-                    margin: { left: 14, right: 14 }
-                });
-
-                // --- TANDA TANGAN (Pengesahan) ---
-                currentY = doc.lastAutoTable.finalY + 20;
-                if(currentY > 260) { doc.addPage(); currentY = 20; } // Jika mentok bawah, pindah halaman
-
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(10);
-                doc.setTextColor(20, 20, 20);
-                doc.text("Mengetahui,", 150, currentY);
-                doc.text("Pengelola Sistem Cerdas", 142, currentY + 25);
-
-
-                // ==========================================
-                // FINISH & DOWNLOAD
-                // ==========================================
-                doc.save(`Laporan_Eksekutif_SmartOryza_${getFormattedDate()}.pdf`);
-
-                restoreDownloadButton(btnIcon, btnText);
-            }, 1000); // Simulasi render 1 detik
+            doc.save("Laporan_SmartOryza_" + Date.now() + ".pdf");
         }
-            // ==========================
-            // REALTIME SENSOR (API)
-            // ==========================
-            async function getSensorData() {
-                try {
-                    const res = await fetch('/api/sensor');
-
-                    if (!res.ok) throw new Error("API Error");
-
-                    const data = await res.json();
-
-                    // SOIL
-                    const soil = data.soil ?? 0;
-                    document.getElementById('soil-value').innerText = soil;
-                    document.getElementById('soil-bar').style.width = soil + "%";
-
-                    // WATER
-                    document.getElementById('distance').innerText = data.water ?? 0;
-
-                    // PIR
-                    const pirStatus = document.getElementById('pir-status');
-                    const pirDot = document.getElementById('pir-dot');
-
-                    const status = (data.pir || "").toLowerCase();
-                    pirStatus.innerText = data.pir ?? "-";
-
-                    if (status === "bahaya") {
-                        pirStatus.classList.remove('text-emerald-600');
-                        pirStatus.classList.add('text-red-600');
-
-                        pirDot.classList.remove('bg-emerald-500');
-                        pirDot.classList.add('bg-red-500');
-                    } else {
-                        pirStatus.classList.remove('text-red-600');
-                        pirStatus.classList.add('text-emerald-600');
-
-                        pirDot.classList.remove('bg-red-500');
-                        pirDot.classList.add('bg-emerald-500');
-                    }
-
-                    // ALERT
-                    const alertBox = document.getElementById('alert-container');
-
-                    if (data.soil < 40) {
-                        // 🔴 KERING
-                        alertBox.innerHTML = `
-                            <p class="text-sm font-semibold text-red-600">⚠️ Tanah Kering!</p>
-                        `;
-                    } else if (data.soil <= 70) {
-                        // 🟢 LEMBAP / NORMAL
-                        alertBox.innerHTML = `
-                            <p class="text-sm font-semibold text-emerald-600">✅ Tanah Lembap (Normal)</p>
-                        `;
-                    } else {
-                        // 🔵 BASAH
-                        alertBox.innerHTML = `
-                            <p class="text-sm font-semibold text-blue-600">💧 Tanah Terlalu Basah!</p>
-                        `;
-                    }
-
-                    // === UPDATE CHART REALTIME ===
-                    const now = new Date();
-                    const timeLabel = now.getHours() + ":" + now.getMinutes();
-
-                    // push data baru
-                    soilData.push(soil);
-                    waterData.push(data.water ?? 0);
-                    labels.push(timeLabel);
-
-                    // batasi max 10 data
-                    if (soilData.length > 10) {
-                        soilData.shift();
-                        waterData.shift();
-                        labels.shift();
-                    }
-
-                    // update chart
-                    historyChart.data.labels = labels;
-                    historyChart.data.datasets[0].data = soilData;
-                    historyChart.data.datasets[1].data = waterData;
-                    historyChart.update();
-
-                } catch (error) {
-                    console.error("Error:", error);
-                }
-            }
-
-            async function getWeather() {
-                try {
-                    const apiKey = "b0d5f22ab03a678d718f8e688f35ef5a";
-
-                    function fetchWeather(lat, lon) {
-                        return fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=id&appid=${apiKey}`)
-                            .then(res => res.json());
-                    }
-
-                    function updateUI(data) {
-                        if (data.cod !== 200) {
-                            console.error("API ERROR:", data.message);
-                            return;
-                        }
-
-                        const temp = Math.round(data.main.temp);
-                        const humidity = data.main.humidity;
-                        const wind = data.wind.speed;
-                        const mainWeather = data.weather[0].main;
-                        const rawDesc = data.weather[0].description.toLowerCase();
-                        const desc = translateWeather(mainWeather.toLowerCase());
-
-                        document.getElementById("weather-temp").innerText =
-                            temp + "°C (" + mainWeather + " - " + desc + ")";
-                        document.getElementById("weather-humidity").innerText = humidity + "%";
-                        document.getElementById("weather-wind").innerText = wind + " km/h";
-                    }
-
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                            async (position) => {
-                                const lat = position.coords.latitude;
-                                const lon = position.coords.longitude;
-
-                                const data = await fetchWeather(lat, lon);
-                                updateUI(data);
-                            },
-                            async (error) => {
-                                console.warn("Gagal ambil lokasi, pakai fallback Sumbersari");
-
-                                // 📍 fallback Sumbersari, Malang
-                                const lat = -7.9553;
-                                const lon = 112.6145;
-
-                                const data = await fetchWeather(lat, lon);
-                                updateUI(data);
-                            }
-                        );
-                    } else {
-                        console.warn("Browser tidak support geolocation");
-
-                        // fallback juga
-                        const data = await fetchWeather(-7.9553, 112.6145);
-                        updateUI(data);
-                    }
-
-                } catch (err) {
-                    console.error("Weather error:", err);
-                }
-            }
-
-            function translateWeather(desc) {
-                const kamus = {
-                    "clear": "Cerah",
-                    "clouds": "Berawan",
-                    "rain": "Hujan",
-                    "drizzle": "Gerimis",
-                    "thunderstorm": "Badai Petir",
-                    "snow": "Salju",
-                    "mist": "Berkabut",
-                    "fog": "Kabut"
-                };
-
-                return kamus[desc] || "Cuaca Tidak Diketahui";
-            }
-
-
-            getWeather();
-            setInterval(getWeather, 600000); // tiap 10 menit
     </script>
 </body>
+
 </html>

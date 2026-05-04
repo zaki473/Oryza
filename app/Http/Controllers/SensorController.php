@@ -3,51 +3,62 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Kreait\Firebase\Factory;
-use App\Models\Sensor;
+use Illuminate\Support\Facades\Http;
+
+// Library bawaan Laravel
 
 class SensorController extends Controller
 {
-    public function getData()
-    {
-        $firebase = (new Factory)
-            ->withServiceAccount(storage_path('app/firebase.json'))
-            ->withDatabaseUri(env('FIREBASE_DATABASE_URL'))
-            ->createDatabase();
-
-        $data = $firebase->getReference('sensor')->getValue();
-
-        return response()->json($data);
-    }
-
     public function store(Request $request)
     {
-        $firebase = (new Factory)
-            ->withServiceAccount(storage_path('app/firebase.json'))
-            ->withDatabaseUri(env('FIREBASE_DATABASE_URL'))
-            ->createDatabase();
+        try {
+            $data = [
+                'soil' => (int) $request->soil,
+                'water' => (float) $request->water,
+                'pir' => $request->pir,
+                'created_at' => now()->toDateTimeString(),
+            ];
 
-        $data = $request->all();
+            // Masukkan URL Firebase Anda di sini
+            $url = 'https://smartoryza-default-rtdb.asia-southeast1.firebasedatabase.app/';
 
-        // 🔥 SIMPAN KE FIREBASE
-        $firebase->getReference('sensor')->set($data);
+            // Kirim data ke Firebase (Format REST API)
+            // Penting: Tambahkan .json di akhir nama path-nya
+            Http::put($url.'iot/latest.json', $data);
+            Http::post($url.'iot/logs.json', $data);
 
-        // 🔥 SIMPAN KE MYSQL
-        Sensor::create([
-            'pir' => $request->input('pir'),
-            'soil' => $request->input('soil'),
-            'water' => $request->input('water'),
-        ]);
+            return response()->json(['status' => 'success'], 200);
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $data
-        ]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
     }
 
-    // 🔥 TAMBAHAN DI SINI
-    public function history()
+    public function getData()
     {
-        return response()->json(Sensor::latest()->get());
+        $url = 'https://smartoryza-default-rtdb.asia-southeast1.firebasedatabase.app/iot/latest.json';
+        $response = Http::get($url);
+
+        return response()->json($response->json());
+    }
+
+    public function toggleServo(Request $request)
+    {
+        try {
+            // 1. Ambil status dari tombol web (1 atau 0)
+            $status = $request->status;
+
+            // 2. URL Firebase ke folder control (tambahkan .json di akhir)
+            $url = 'https://smartoryza-default-rtdb.asia-southeast1.firebasedatabase.app/iot/control/pintu_air.json';
+
+            // 3. Update nilai di Firebase
+            // Kita kirim angka langsung (tanpa array) karena di ESP32 kita pakai payload.toInt()
+            Http::put($url, $status);
+
+            return response()->json(['status' => 'success', 'manual_status' => $status], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
     }
 }
