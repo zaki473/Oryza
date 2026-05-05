@@ -96,17 +96,7 @@
                     
                     <div class="w-px h-6 bg-gray-200"></div>
 
-                    @if (Route::has('login'))
-                        @auth
-                            <a href="{{ url('/dashboard') }}" class="text-sm font-bold text-white bg-brand-900 px-5 py-2.5 rounded-full hover:bg-brand-800 transition shadow-md shadow-brand-900/20">Dashboard</a>
-                            <form method="POST" action="{{ route('logout') }}" class="inline">
-                                @csrf
-                                <button type="submit" class="text-sm font-semibold text-red-500 hover:text-red-700 transition">Logout</button>
-                            </form>
-                        @else
-                            <button onclick="openModal('login')" class="text-sm font-bold text-white bg-brand-900 px-5 py-2.5 rounded-full hover:bg-brand-800 transition shadow-md shadow-brand-900/20">Masuk</button>
-                        @endauth
-                    @endif
+                    <div id="authButton"></div>
                 </div>
             </div>
         </div>
@@ -254,8 +244,7 @@
 
             <div class="p-8 bg-soft">
                 <!-- FORM LOGIN -->
-                <form id="loginForm" method="POST" action="{{ route('login') }}" class="space-y-4 block">
-                    @csrf
+                <form id="loginForm" class="space-y-4 block">
                     <div>
                         <label class="block text-xs font-semibold text-gray-600 mb-1">Email</label>
                         <input type="email" name="email" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition shadow-sm" placeholder="contoh@email.com" required>
@@ -267,57 +256,56 @@
                     <button type="submit" class="w-full py-3.5 mt-2 bg-brand-900 text-white font-bold rounded-xl hover:bg-brand-800 transition shadow-lg shadow-brand-900/20 flex justify-center items-center gap-2">
                         <span>Masuk ke Dashboard</span>
                     </button>
+
+                    <script>
+                    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+                        e.preventDefault();
+
+                        const email = this.email.value;
+                        const password = this.password.value;
+
+                        await setPersistence(auth, browserSessionPersistence);
+
+                        try {
+                            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                            const user = userCredential.user;
+
+                            // ✅ SIMPAN KE FIRESTORE
+                            await setDoc(doc(db, "users", user.uid), {
+                                email: user.email,
+                                last_login: new Date().toISOString()
+                            }, { merge: true });
+
+                            // ✅ KIRIM KE LARAVEL
+                            const token = await user.getIdToken();
+
+                            await fetch('/api/login-firebase', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ token })
+                            });
+
+                            window.location.href = "/dashboard";
+
+                        } catch (error) {
+                            alert(error.message);
+                        }
+                    });
+                    </script>
                 </form>
-                <!-- FORM REGISTER -->
-                <form id="registerForm" method="POST" action="{{ route('register') }}" class="space-y-4 hidden">
-                    @csrf
-
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Nama</label>
-                        <input type="text" name="name" required class="w-full px-4 py-3 rounded-xl border border-gray-200">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Email</label>
-                        <input type="email" name="email" required class="w-full px-4 py-3 rounded-xl border border-gray-200">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Password</label>
-                        <input type="password" name="password" required class="w-full px-4 py-3 rounded-xl border border-gray-200">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Konfirmasi Password</label>
-                        <input type="password" name="password_confirmation" required class="w-full px-4 py-3 rounded-xl border border-gray-200">
-                    </div>
-
-                    <button type="submit" class="w-full py-3.5 mt-2 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition">
-                        Daftar
-                    </button>
-                </form>
-                <div class="text-center mt-4">
-                <button onclick="switchTab('register')" id="toRegister" class="text-sm text-green-600">
-                    Belum punya akun? Daftar
-                </button>
-
-                <button onclick="switchTab('login')" id="toLogin" class="text-sm text-blue-600 hidden">
-                    Sudah punya akun? Login
-                </button>
-            </div>
             </div>
         </div>
     </div>
 
     <!-- Menangani Pesan Error Bawaan Laravel jika di-refresh -->
-    @if ($errors->any())
+        @if ($errors->any())
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                openModal('login');
-                showPopup('error', 'Gagal', '{{ $errors->first() }}');
-            });
+        document.addEventListener("DOMContentLoaded", function() {
+            openModal('login');
+            showPopup('error', 'Gagal', '{{ $errors->first() }}');
+        });
         </script>
-    @endif
+        @endif
 
     <script>
         // --- ANIMASI SCROLL ---
@@ -414,107 +402,119 @@
                 modalTitle.textContent = 'Selamat Datang Kembali';
             }
         }
-
-        // --- PENGIRIMAN FORM (AJAX INTERCEPT) ---
-        
-        // 1. Logika Form Login
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault(); 
-            const btn = this.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Memproses...</span>';
-            btn.disabled = true;
-
-            try {
-                const response = await fetch(this.action, {
-                    method: 'POST',
-                    headers: { 
-                        'X-Requested-With': 'XMLHttpRequest', 
-                        'Accept': 'application/json' 
-                    },
-                    credentials: 'same-origin', // SANGAT PENTING untuk Laravel Security
-                    body: new FormData(this)
-                });
-
-                // Jika login sukses (bisa berstatus 200/204 atau redirect 302 yang diikuti browser)
-                if (response.ok || response.redirected) {
-                    showPopup('success', 'Berhasil', 'Login berhasil!');
-
-                    // UX kecil
-                    document.getElementById('loginForm').reset();
-
-                    // kasih delay biar user lihat notif dulu
-                    setTimeout(() => {
-                        window.location.href = "{{ url('/dashboard') }}";
-                    }, 1500);
-                }
-                // Jika error 422, artinya validasi gagal (salah email / password)
-                else if (response.status === 422) {
-                    const data = await response.json();
-                    let errorMsg = 'Email atau kata sandi yang Anda masukkan salah.';
-                    if(data.errors) errorMsg = Object.values(data.errors)[0][0]; 
-                    
-                    showPopup('error', 'Login Gagal', errorMsg);
-                } 
-                // Jika error 419, CSRF Token Expired (Kelamaan diam / session terputus)
-                else if (response.status === 419) {
-                    showPopup('error', 'Sesi Berakhir', 'Keamanan sesi habis. Halaman akan dimuat ulang.');
-                    setTimeout(() => window.location.reload(), 2000);
-                } 
-                // Error lainnya
-                else {
-                    showPopup('error', 'Kesalahan Sistem', 'Tidak dapat terhubung ke server.');
-                }
-            } catch (err) {
-                showPopup('error', 'Koneksi Terputus', 'Periksa koneksi internet Anda.');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        });
-
-        // 2. Logika Form Register (AJAX)
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const btn = this.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Memproses...</span>';
-            btn.disabled = true;
-
-            try {
-                const response = await fetch(this.action, {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'same-origin',
-                    body: new FormData(this)
-                });
-
-                if (response.ok) {
-                    showPopup('success', 'Berhasil', 'Akun berhasil dibuat!');
-                    
-                    // 👉 UX kecil (biar smooth)
-                    this.reset(); // kosongkan form
-                    switchTab('login'); // pindah ke login
-                } 
-                else if (response.status === 422) {
-                    const data = await response.json();
-                    let errorMsg = Object.values(data.errors)[0][0];
-                    showPopup('error', 'Registrasi Gagal', errorMsg);
-                } 
-                else {
-                    showPopup('error', 'Error', 'Terjadi kesalahan.');
-                }
-            } catch (err) {
-                showPopup('error', 'Koneksi', 'Tidak terhubung ke server.');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        });
     </script>
-</body>
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+        getAuth, 
+        signInWithEmailAndPassword, 
+        setPersistence, 
+        browserSessionPersistence, 
+        onAuthStateChanged, 
+        signOut 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    import {
+        getFirestore,
+        doc,
+        setDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // CONFIG
+    const firebaseConfig = {
+        apiKey: "AIzaSyC0QjC5TAy-ia1AzLLaaPLL53gcmLH1TbM",
+        authDomain: "smartoryza.firebaseapp.com",
+        projectId: "smartoryza",
+    };
+
+    // INIT
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ================= LOGIN =================
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const email = this.email.value;
+        const password = this.password.value;
+
+        try {
+            await setPersistence(auth, browserSessionPersistence);
+
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Simpan ke Firestore
+            await setDoc(doc(db, "users", user.uid), {
+                email: user.email,
+                last_login: new Date().toISOString()
+            }, { merge: true });
+
+            // Kirim ke Laravel
+            const token = await user.getIdToken();
+
+            await fetch('/api/login-firebase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token })
+            });
+
+            showPopup('success', 'Berhasil', 'Login sukses!');
+            
+            setTimeout(() => {
+                window.location.href = "/dashboard";
+            }, 1000);
+
+        } catch (error) {
+            showPopup('error', 'Login Gagal', error.message);
+        }
+    });
+
+    // ================= AUTH STATE =================
+    onAuthStateChanged(auth, (user) => {
+        const authDiv = document.getElementById("authButton");
+
+        if (user) {
+            authDiv.innerHTML = `
+                <a href="/dashboard" class="text-sm font-bold text-white bg-brand-900 px-5 py-2.5 rounded-full">
+                    Dashboard
+                </a>
+                <button onclick="logout()" class="ml-3 text-sm text-red-500">Logout</button>
+            `;
+        } else {
+            authDiv.innerHTML = `
+                <button onclick="openModal('login')" class="text-sm font-bold text-white bg-brand-900 px-5 py-2.5 rounded-full">
+                    Login
+                </button>
+            `;
+        }
+    });
+
+    // ================= LOGOUT =================
+    window.logout = function() {
+        signOut(auth).then(() => {
+            showPopup('success', 'Logout', 'Berhasil logout');
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 1000);
+        });
+    };
+
+    </script>
+
+    <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyC0QjC5TAy-ia1AzLLaaPLL53gcmLH1TbM",
+        authDomain: "smartoryza.firebaseapp.com",
+        databaseURL: "https://smartoryza-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "smartoryza",
+        storageBucket: "smartoryza.firebasestorage.app",
+        messagingSenderId: "63042198526",
+        appId: "1:63042198526:web:fa0620b2c786a53c977eaf",
+        measurementId: "G-S9Q8YM6609"
+    };
+
+    </script>
 </html>

@@ -9,10 +9,12 @@ Route::get('/', function () {
     return view('user.home'); 
 })->name('home');
 
+Route::get('/login', function () { return redirect('/'); });
+
 // Dashboard
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware('auth')->name('dashboard');
+})->name('dashboard');
 
 // Profile
 Route::middleware('auth')->group(function () {
@@ -30,6 +32,15 @@ Route::prefix('api')->group(function () {
         ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
     Route::get('/history', [SensorController::class, 'history']); // 🔥 tambahan
+});
+
+Route::post('/api/login-firebase', function (\Illuminate\Http\Request $request) {
+    $token = $request->token;
+
+    return response()->json([
+        'message' => 'Token diterima',
+        'token' => $token
+    ]);
 });
 
 // Auth

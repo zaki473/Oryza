@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>SmartOryza - Dashboard Monitor</title>
 
     <link
@@ -78,16 +79,23 @@
         </div>
         <div class="flex items-center gap-5">
             <div class="text-right hidden sm:block">
-                <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->name ?? 'Petani Modern' }}</p>
+                <p id="username" class="text-sm font-semibold text-gray-800">{{ Auth::user()->name ?? 'Petani Modern' }}</p>
                 <p class="text-xs text-gray-500" id="current-time">Loading...</p>
             </div>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"
-                    class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold border border-red-100">Keluar</button>
-            </form>
+            <a href="{{ route('home') }}"
+            class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold border">
+                Home
+            </a>
+            <button onclick="logoutFirebase()"
+                class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold border border-red-100">
+                Keluar
+            </button>
         </div>
     </nav>
+
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+        @csrf
+    </form>
 
     <main class="max-w-7xl mx-auto px-6 md:px-10 py-8">
 
@@ -245,6 +253,16 @@
     </main>
 
     <script type="module">
+    window.logoutFirebase = function() {
+        auth.signOut()
+            .then(() => {
+                document.getElementById('logout-form').submit();
+            })
+            .catch((error) => {
+                console.error("Logout error:", error);
+            });
+    }
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import {
         initializeApp
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -253,16 +271,65 @@
         ref,
         onValue,
         set,
-        get
+        get,
+        query,
+        limitToLast
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy, limit } 
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     // 1. KONFIGURASI FIREBASE
     const firebaseConfig = {
-        databaseURL: "https://smartoryza-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        apiKey: "AIzaSyC0QjC5TAy-ia1AzLLaaPLL53gcmLH1TbM",
+        authDomain: "smartoryza.firebaseapp.com",
+        databaseURL: "https://smartoryza-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "smartoryza",
+        storageBucket: "smartoryza.firebasestorage.app",
+        messagingSenderId: "63042198526",
+        appId: "1:63042198526:web:fa0620b2c786a53c977eaf",
+        measurementId: "G-S9Q8YM6609"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const firestore = getFirestore(app);
+    let limit = 10;
+
+    function renderLogs(snapshot) {
+        const data = snapshot.val();
+        const logContainer = document.getElementById('log-container');
+        logContainer.innerHTML = '';
+
+        if (data) {
+            const logs = Object.values(data).reverse();
+
+            logs.forEach(log => {
+                const time = new Date(log.created_at).toLocaleTimeString('id-ID');
+                const status = (log.pir || "").toLowerCase();
+
+                const el = document.createElement('div');
+                el.className = "p-3 bg-gray-50 rounded-lg border-l-4 " +
+                    (status === 'bahaya' ? 'border-red-500' : 'border-emerald-500');
+
+                el.innerHTML = `
+                    <div class="flex justify-between">
+                        <span class="text-xs">${time}</span>
+                        <span class="text-xs font-bold">${status}</span>
+                    </div>
+                    <p class="text-xs">Soil: ${log.soil}% | Air: ${log.water}cm</p>
+                `;
+
+                logContainer.appendChild(el);
+            });
+        }
+    }
+
+    // query pertama
+    let logsQuery = query(ref(db, 'iot/logs'), limitToLast(limit));
+    onValue(logsQuery, renderLogs);
+
+    const auth = getAuth(app);
 
     // 2. SETUP CHART (GRAFIK)
     const ctx = document.getElementById('historyChart').getContext('2d');
@@ -325,7 +392,7 @@
 
     window.controlScarecrow = function(status) {
         const scarecrowRef = ref(db, 'iot/control/scarecrow');
-        set(scareRef, status)
+        set(scarecrowRef, status)
             .then(() => {
                 alert("Perintah pengusir hama berhasil dikirim ke ESP32!");
             })
@@ -492,19 +559,19 @@
             }
             historyChart.update();
 
-            // Update Logs
-            const logContainer = document.getElementById('log-container');
-            const newLog = document.createElement('div');
-            newLog.className = "p-3 bg-gray-50 rounded-lg border-l-4 " + (status === 'bahaya' ? 'border-red-500' : 'border-emerald-500');
-            newLog.innerHTML = `
-                <div class="flex justify-between items-center mb-1">
-                    <span class="font-bold text-xs text-gray-500">${timeStr}</span>
-                    <span class="text-[10px] uppercase font-bold ${status === 'bahaya' ? 'text-red-500' : 'text-emerald-500'}">${status}</span>
-                </div>
-                <p class="text-xs">Soil: ${data.soil}%, Air: ${data.water}cm</p>
-            `;
-            logContainer.prepend(newLog);
-            if (logContainer.children.length > 5) logContainer.lastChild.remove();
+            import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+            const auth = getAuth();
+
+            if (data && auth.currentUser) {
+                addDoc(collection(firestore, "iot_logs"), {
+                    user_id: auth.currentUser.uid,
+                    soil: data.soil,
+                    water: data.water,
+                    pir: data.pir,
+                    created_at: new Date()
+                });
+            }
 
         } else {
             esp32Status.innerText = "ESP32 Tidak Aktif";
@@ -540,6 +607,49 @@
         }
     });
 
+    import { query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const logsRef = query(ref(db, 'iot/logs'), limitToLast(20));
+
+    onValue(logsRef, (snapshot) => {
+        const data = snapshot.val();
+        const logContainer = document.getElementById('log-container');
+        logContainer.innerHTML = '';
+
+        if (data) {
+            const logs = Object.values(data).reverse();
+
+            logs.forEach(log => {
+                const time = new Date(log.created_at).toLocaleTimeString('id-ID');
+                const status = (log.pir || "").toLowerCase();
+
+                const el = document.createElement('div');
+                el.className = "p-3 bg-gray-50 rounded-lg border-l-4 " +
+                    (status === 'bahaya' ? 'border-red-500' : 'border-emerald-500');
+
+                el.innerHTML = `
+                    <div class="flex justify-between">
+                        <span class="text-xs">${time}</span>
+                        <span class="text-xs font-bold">${status}</span>
+                    </div>
+                    <p class="text-xs">Soil: ${log.soil}% | Air: ${log.water}cm</p>
+                `;
+
+                logContainer.appendChild(el);
+            });
+        }
+    });
+
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // ❌ kalau belum login → balikin ke landing page
+            window.location.href = "/";
+        } else {
+            // ✅ kalau login → tampilkan user
+            document.querySelector('#username').innerText = user.email;
+        }
+    });
+
     setInterval(() => {
         document.getElementById('current-time').innerText = new Date().toLocaleString('id-ID', {
             weekday: 'long',
@@ -550,42 +660,85 @@
             minute: '2-digit'
         });
     }, 1000);
+
+    function goHome() {
+        window.location.href = "/";
+    }
 </script>
 
     <script>
-        function downloadPDF() {
-            const {
-                jsPDF
-            } = window.jspdf;
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.setFontSize(18);
-            doc.text("Laporan SmartOryza IoT", 14, 20);
-            doc.setFontSize(10);
-            doc.text("Dicetak pada: " + new Date().toLocaleString(), 14, 28);
 
-            const soil = document.getElementById('soil-value').innerText;
-            const water = document.getElementById('distance').innerText;
-            const status = document.getElementById('pir-status').innerText;
+            doc.text("Laporan SmartOryza (1 Bulan)", 14, 20);
+
+            onAuthStateChanged(auth, (user) => {
+                if (!user) return;
+
+                const q = query(
+                    collection(firestore, "iot_logs"),
+                    where("user_id", "==", user.uid),
+                    orderBy("created_at", "desc"),
+                    limit(10)
+                );
+
+                onSnapshot(q, (snapshot) => {
+                    const logContainer = document.getElementById('log-container');
+                    logContainer.innerHTML = '';
+
+                    snapshot.forEach(doc => {
+                        const log = doc.data();
+                        const time = new Date(log.created_at.seconds * 1000).toLocaleTimeString('id-ID');
+
+                        const el = document.createElement('div');
+                        el.className = "p-3 bg-gray-50 rounded-lg border-l-4 " +
+                            (log.pir === 'bahaya' ? 'border-red-500' : 'border-emerald-500');
+
+                        el.innerHTML = `
+                            <div class="flex justify-between">
+                                <span class="text-xs">${time}</span>
+                                <span class="text-xs font-bold">${log.pir}</span>
+                            </div>
+                            <p class="text-xs">Soil: ${log.soil}% | Air: ${log.water}cm</p>
+                        `;
+
+                        logContainer.appendChild(el);
+                    });
+                });
+            });
+            
+            const snapshot = await get(logsRef);
+            const data = snapshot.val();
+
+            let rows = [];
+
+            if (data) {
+                const now = new Date();
+                const oneMonthAgo = new Date();
+                oneMonthAgo.setMonth(now.getMonth() - 1);
+
+                Object.values(data).forEach(log => {
+                    const logDate = new Date(log.created_at);
+
+                    if (logDate >= oneMonthAgo) {
+                        rows.push([
+                            logDate.toLocaleString('id-ID'),
+                            log.soil + '%',
+                            log.water + ' cm',
+                            log.pir
+                        ]);
+                    }
+                });
+            }
 
             doc.autoTable({
-                startY: 35,
-                head: [
-                    ['Parameter Sensor', 'Nilai Real-time']
-                ],
-                body: [
-                    ['Kelembapan Tanah', soil + ' %'],
-                    ['Tinggi Air (Sensor 1)', water + ' cm'],
-                    ['Status Hama (Sensor 2)', status],
-                    ['Kondisi Sistem', 'NORMAL / ONLINE']
-                ],
-                theme: 'grid',
-                headStyles: {
-                    fillColor: [34, 197, 94]
-                }
+                head: [['Waktu', 'Soil', 'Air', 'Status']],
+                body: rows
             });
 
-            doc.save("Laporan_SmartOryza_" + Date.now() + ".pdf");
-        }
+            doc.save("laporan_1_bulan.pdf");
+}
     </script>
 </body>
 
