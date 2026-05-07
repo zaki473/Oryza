@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    container_name: oryza-app
+    volumes:
+      - .:/var/www/html
+    expose:
+      - 9000
+
+  nginx:
+    image: nginx:alpine
+    container_name: oryza-nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
