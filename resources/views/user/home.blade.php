@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -93,7 +93,7 @@
                 <div class="hidden md:flex items-center gap-8">
                     <a href="#latar-belakang" class="text-sm font-semibold text-gray-600 hover:text-brand-600 transition">Pendahuluan</a>
                     <a href="#solusi" class="text-sm font-semibold text-gray-600 hover:text-brand-600 transition">Solusi IoT</a>
-                    
+
                     <div class="w-px h-6 bg-gray-200"></div>
 
                     <div id="authButton"></div>
@@ -104,10 +104,10 @@
 
     <!-- Hero Section -->
     <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-100" 
+        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-100"
              style="background-image: url('{{ asset('images/padi.jpg') }}');"></div>
         <div class="absolute inset-0 bg-gradient-to-b from-white/80 via-white/30 to-[#f4f7f4]"></div>
-        
+
         <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 text-center">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-100 text-brand-700 text-xs font-bold mb-6 border border-brand-200 shadow-sm">
                 <span class="relative flex h-2 w-2">
@@ -194,7 +194,7 @@
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Sensor Kelembapan</h3>
                     <p class="text-gray-500 text-sm leading-relaxed">Membaca kadar air dalam tanah secara presisi dan real-time. Memastikan tanah tidak pernah kekeringan atau kelebihan air.</p>
                 </div>
-                
+
                 <div class="bg-white p-8 rounded-3xl shadow-lg hover:-translate-y-2 transition-all duration-300 group" style="transition-delay: 0.1s;">
                     <div class="w-14 h-14 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-brand-600 group-hover:text-white transition-all duration-300">
                         <i class="fas fa-faucet"></i>
@@ -228,7 +228,7 @@
     <!-- ================= MODAL LOGIN & REGISTER ================= -->
     <div id="authModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4">
         <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
-        
+
         <div id="modalPanel" class="bg-white w-full max-w-md rounded-3xl shadow-2xl relative z-10 overflow-hidden transform scale-95 opacity-0 transition-all duration-300 border border-white">
             <div class="bg-brand-900 p-6 text-center relative overflow-hidden">
                 <div class="absolute -top-10 -right-10 w-32 h-32 bg-white opacity-5 rounded-full blur-xl"></div>
@@ -406,13 +406,13 @@
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { 
-        getAuth, 
-        signInWithEmailAndPassword, 
-        setPersistence, 
-        browserSessionPersistence, 
-        onAuthStateChanged, 
-        signOut 
+    import {
+        getAuth,
+        signInWithEmailAndPassword,
+        setPersistence,
+        browserSessionPersistence,
+        onAuthStateChanged,
+        signOut
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     import {
@@ -462,7 +462,7 @@
             });
 
             showPopup('success', 'Berhasil', 'Login sukses!');
-            
+
             setTimeout(() => {
                 window.location.href = "/dashboard";
             }, 1000);
