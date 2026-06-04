@@ -132,13 +132,18 @@
             </div>
             <h1 class="text-2xl font-bold tracking-tight font-serif text-brand-900">Smart<span class="text-brand-500">Oryza</span></h1>
         </div>
-        <div class="flex items-center gap-5">
-            <div class="text-right hidden sm:block">
-                <p id="username" class="text-sm font-semibold text-gray-800">Petani Modern</p>
-                <p class="text-xs text-gray-500" id="current-time">Loading...</p>
-            </div>
-            <button onclick="location.reload()" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold border">Refresh</button>
-        </div>
+       <div class="flex items-center gap-5">
+    <div class="text-right hidden sm:block">
+        <p id="username" class="text-sm font-semibold text-gray-800">Petani Modern</p>
+        <p class="text-xs text-gray-500" id="current-time">Loading...</p>
+    </div>
+
+    <a href="{{ route('home') }}"
+       class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold border border-gray-300 transition-colors flex items-center gap-2">
+        <i class="fas fa-home"></i> Home
+    </a>
+</div>
+</div>
     </nav>
 
     <main class="max-w-7xl mx-auto px-6 md:px-10 py-8">
