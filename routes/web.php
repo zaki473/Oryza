@@ -9,10 +9,12 @@ Route::get('/', function () {
     return view('user.home'); 
 })->name('home');
 
-Route::get('/login', function () { return redirect('/'); });
+Route::get('/login', function () { 
+    return view('auth.login'); 
+})->name('login');
 
 // Dashboard
-Route::get('/dashboard', function () {
+Route::middleware('auth')->get('/dashboard', function () {
     return view('dashboard');
 })->name('dashboard');
 
