@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartOryza - Sistem Irigasi & Perlindungan Padi IoT</title>
 
-    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -91,14 +89,12 @@
 </head>
 <body class="font-sans text-gray-700 bg-soft antialiased selection:bg-brand-500 selection:text-white">
 
-    <!-- LOADING OVERLAY -->
     <div id="loadingOverlay" class="loading-overlay">
         <div class="spinner"></div>
         <p class="text-white text-lg font-semibold mt-6">Sedang memproses...</p>
         <p class="text-white/70 text-sm mt-1">Mohon tunggu sebentar</p>
     </div>
 
-    <!-- POP-UP NOTIFIKASI GLOBAL -->
     <div id="notificationPopup" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-[200] transition-all duration-300 opacity-0 -translate-y-10 pointer-events-none">
         <div class="bg-white px-6 py-4 rounded-2xl shadow-2xl border border-gray-100 flex items-center gap-4 min-w-[320px]">
             <div id="notifyIcon" class="w-10 h-10 rounded-full flex items-center justify-center text-lg"></div>
@@ -110,11 +106,9 @@
         </div>
     </div>
 
-    <!-- Navbar -->
     <nav class="fixed w-full z-50 top-0 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
         <div class="max-w-7xl mx-auto px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
-                <!-- Logo -->
                 <a href="#" class="flex items-center gap-3 group">
                     <div class="w-10 h-10 bg-brand-900 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
                         <span class="text-xl text-white">🌾</span>
@@ -124,7 +118,6 @@
                     </span>
                 </a>
 
-                <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center gap-8">
                     <a href="#latar-belakang" class="text-sm font-semibold text-gray-600 hover:text-brand-600 transition">Pendahuluan</a>
                     <a href="#solusi" class="text-sm font-semibold text-gray-600 hover:text-brand-600 transition">Solusi IoT</a>
@@ -133,11 +126,25 @@
 
                     <div id="authButton" class="flex items-center gap-2"></div>
                 </div>
+
+                <div class="flex items-center md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-600 hover:text-brand-600 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
             </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-gray-100 px-6 py-4 space-y-3 shadow-lg">
+            <a href="#latar-belakang" class="block text-base font-semibold text-gray-600 hover:text-brand-600 py-2">Pendahuluan</a>
+            <a href="#solusi" class="block text-base font-semibold text-gray-600 hover:text-brand-600 py-2">Solusi IoT</a>
+            <div class="border-t border-gray-100 pt-3"></div>
+            <div id="authButtonMobile" class="flex flex-col gap-2 pt-1"></div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
         <div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-100"
              style="background-image: url('{{ asset('images/padi.jpg') }}');"></div>
@@ -168,7 +175,6 @@
         </div>
     </section>
 
-    <!-- Background & Problem -->
     <section id="latar-belakang" class="relative py-24 overflow-hidden">
         <div class="absolute top-0 left-10 w-72 h-72 bg-brand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
         <div class="absolute top-0 right-10 w-72 h-72 bg-[#e4eba7] rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob" style="animation-delay: 2s;"></div>
@@ -210,7 +216,6 @@
         </div>
     </section>
 
-    <!-- Solution & Features -->
     <div class="px-4 lg:px-8 max-w-[90rem] mx-auto mb-20">
         <section id="solusi" class="relative bg-brand-900 rounded-[2.5rem] lg:rounded-[3.5rem] py-20 px-6 lg:px-12 shadow-2xl overflow-hidden">
             <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-600 rounded-full filter blur-[100px] opacity-30 mix-blend-screen"></div>
@@ -249,7 +254,6 @@
         </section>
     </div>
 
-    <!-- Footer -->
     <footer class="border-t border-gray-200 py-10">
         <div class="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-2">
@@ -260,7 +264,6 @@
         </div>
     </footer>
 
-    <!-- ================= MODAL LOGIN & REGISTER ================= -->
     <div id="authModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4">
         <div class="absolute inset-0 bg-brand-900/40 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
 
@@ -278,7 +281,6 @@
             </div>
 
             <div class="p-8 bg-soft">
-                <!-- FORM LOGIN -->
                 <form id="loginForm" class="space-y-4 block">
                     <div>
                         <label class="block text-xs font-semibold text-gray-600 mb-1">Email</label>
@@ -292,79 +294,19 @@
                         <span id="loginBtnText">Masuk ke Dashboard</span>
                         <span id="loginBtnSpinner" class="hidden"><i class="fas fa-spinner animate-spin"></i></span>
                     </button>
-
-                    <script>
-                    document.getElementById("loginForm").addEventListener("submit", async function(e) {
-                        e.preventDefault();
-
-                        const email = this.email.value;
-                        const password = this.password.value;
-                        const submitBtn = document.getElementById("loginSubmitBtn");
-                        const btnText = document.getElementById("loginBtnText");
-                        const btnSpinner = document.getElementById("loginBtnSpinner");
-                        const loadingOverlay = document.getElementById("loadingOverlay");
-
-                        // Show loading state
-                        submitBtn.disabled = true;
-                        btnText.classList.add('hidden');
-                        btnSpinner.classList.remove('hidden');
-                        loadingOverlay.classList.add('active');
-
-                        await setPersistence(auth, browserSessionPersistence);
-
-                        try {
-                            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                            const user = userCredential.user;
-
-                            // ✅ SIMPAN KE FIRESTORE
-                            await setDoc(doc(db, "users", user.uid), {
-                                email: user.email,
-                                last_login: new Date().toISOString()
-                            }, { merge: true });
-
-                            // ✅ KIRIM KE LARAVEL
-                            const token = await user.getIdToken();
-
-                            const response = await fetch('/api/login-firebase', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ token })
-                            });
-
-                            if (response.ok) {
-                                showPopup('success', 'Login Berhasil', 'Mengarahkan ke dashboard...');
-                                setTimeout(() => {
-                                    window.location.href = "/dashboard";
-                                }, 1500);
-                            } else {
-                                throw new Error('Login ke server gagal');
-                            }
-
-                        } catch (error) {
-                            // Hide loading state
-                            submitBtn.disabled = false;
-                            btnText.classList.remove('hidden');
-                            btnSpinner.classList.add('hidden');
-                            loadingOverlay.classList.remove('active');
-
-                            showPopup('error', 'Login Gagal', error.message);
-                        }
-                    });
-                    </script>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Menangani Pesan Error Bawaan Laravel jika di-refresh -->
-        @if ($errors->any())
-        <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            openModal('login');
-            showPopup('error', 'Gagal', '{{ $errors->first() }}');
-        });
-        </script>
-        @endif
+    @if ($errors->any())
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        openModal('login');
+        showPopup('error', 'Gagal', '{{ $errors->first() }}');
+    });
+    </script>
+    @endif
 
     <script>
         // --- FUNGSI MODAL GLOBAL ---
@@ -436,194 +378,164 @@
             popup.classList.remove('opacity-100', 'translate-y-0');
         }
 
-        function closePopup() {
-            const popup = document.getElementById('notificationPopup');
-            popup.classList.remove('opacity-100', 'translate-y-0');
-            popup.classList.add('opacity-0', '-translate-y-10', 'pointer-events-none');
-        }
+        // --- TOGGLE MOBILE MENU ---
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
 
-        // --- LOGIKA MODAL ---
-        const modal = document.getElementById('authModal');
-        const modalPanel = document.getElementById('modalPanel');
-
-        function openModal(type = 'login') {
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            setTimeout(() => {
-                modalPanel.classList.remove('scale-95', 'opacity-0');
-                modalPanel.classList.add('scale-100', 'opacity-100');
-            }, 10);
-            switchTab(type);
-        }
-
-        function closeModal() {
-            modalPanel.classList.remove('scale-100', 'opacity-100');
-            modalPanel.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }, 300);
-        }
-
-        function switchTab(type) {
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            const toLogin = document.getElementById('toLogin');
-            const toRegister = document.getElementById('toRegister');
-            const modalTitle = document.getElementById('modalTitle');
-
-            if (type === 'register') {
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-
-                toRegister.classList.add('hidden');
-                toLogin.classList.remove('hidden');
-
-                modalTitle.textContent = 'Buat Akun Baru';
-            } else {
-                loginForm.classList.remove('hidden');
-                registerForm.classList.add('hidden');
-
-                toRegister.classList.remove('hidden');
-                toLogin.classList.add('hidden');
-
-                modalTitle.textContent = 'Selamat Datang Kembali';
-            }
-        }
+        menuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
     </script>
 
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-        getAuth,
-        signInWithEmailAndPassword,
-        setPersistence,
-        browserSessionPersistence,
-        onAuthStateChanged,
-        signOut
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import {
+            getAuth,
+            signInWithEmailAndPassword,
+            setPersistence,
+            browserSessionPersistence,
+            onAuthStateChanged,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    import {
-        getFirestore,
-        doc,
-        setDoc
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import {
+            getFirestore,
+            doc,
+            setDoc
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // CONFIG
-    const firebaseConfig = {
-        apiKey: "AIzaSyC0QjC5TAy-ia1AzLLaaPLL53gcmLH1TbM",
-        authDomain: "smartoryza.firebaseapp.com",
-        projectId: "smartoryza",
-    };
+        // CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0QjC5TAy-ia1AzLLaaPLL53gcmLH1TbM",
+            authDomain: "smartoryza.firebaseapp.com",
+            projectId: "smartoryza",
+        };
 
-    // INIT
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+        // INIT
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    // ================= LOGIN =================
-    document.getElementById("loginForm").addEventListener("submit", async function(e) {
-        e.preventDefault();
+        // ================= LOGIN =================
+        document.getElementById("loginForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
 
-        const email = this.email.value;
-        const password = this.password.value;
+            const email = this.email.value;
+            const password = this.password.value;
+            const submitBtn = document.getElementById("loginSubmitBtn");
+            const loadingOverlay = document.getElementById("loadingOverlay");
 
-        try {
-            await setPersistence(auth, browserSessionPersistence);
-
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-
-            // Simpan ke Firestore
-            await setDoc(doc(db, "users", user.uid), {
-                email: user.email,
-                last_login: new Date().toISOString()
-            }, { merge: true });
-
-            // Kirim ke Laravel
-            const token = await user.getIdToken();
-
-            await fetch('/api/login-firebase', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token })
-            });
-
-            showPopup('success', 'Berhasil', 'Login sukses!');
-
-            setTimeout(() => {
-                window.location.href = "/dashboard";
-            }, 1000);
-
-        } catch (error) {
-            showPopup('error', 'Login Gagal', error.message);
-        }
-    });
-
-    // ================= AUTH STATE =================
-    onAuthStateChanged(auth, (user) => {
-        const authDiv = document.getElementById("authButton");
-
-        if (user) {
-            authDiv.innerHTML = `
-                <a href="/dashboard" class="text-sm font-bold text-white bg-brand-900 px-5 py-2.5 rounded-full hover:bg-brand-800 transition">
-                    <i class="fas fa-chart-line mr-1.5"></i> Dashboard
-                </a>
-                <button onclick="logout()" class="text-sm font-bold text-white bg-red-600 px-5 py-2.5 rounded-full hover:bg-red-700 transition flex items-center gap-1.5">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            `;
-        } else {
-            authDiv.innerHTML = `
-                <button onclick="openModal('login')" class="text-sm font-bold text-white bg-brand-900 px-5 py-2.5 rounded-full hover:bg-brand-800 transition">
-                    <i class="fas fa-lock mr-1.5"></i> Login
-                </button>
-            `;
-        }
-    });
-
-    // ================= LOGOUT =================
-    window.logout = function() {
-        if (!confirm('Apakah Anda yakin ingin logout?')) return;
-
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        loadingOverlay.classList.add('active');
-
-        signOut(auth).then(async () => {
-            // Logout dari Laravel
             try {
-                await fetch('/api/logout-firebase', {
+                if(submitBtn) submitBtn.disabled = true;
+                if(loadingOverlay) loadingOverlay.classList.add('active');
+
+                await setPersistence(auth, browserSessionPersistence);
+
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Simpan ke Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    email: user.email,
+                    last_login: new Date().toISOString()
+                }, { merge: true });
+
+                // Kirim ke Laravel
+                const token = await user.getIdToken();
+
+                await fetch('/api/login-firebase', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
                 });
-            } catch (e) {
-                console.log('Logout dari server:', e);
+
+                showPopup('success', 'Berhasil', 'Login sukses!');
+
+                setTimeout(() => {
+                    window.location.href = "/dashboard";
+                }, 1000);
+
+            } catch (error) {
+                if(submitBtn) submitBtn.disabled = false;
+                if(loadingOverlay) loadingOverlay.classList.remove('active');
+                showPopup('error', 'Login Gagal', error.message);
             }
-
-            showPopup('success', 'Berhasil Logout', 'Mengarahkan ke halaman utama...');
-            setTimeout(() => {
-                loadingOverlay.classList.remove('active');
-                window.location.href = "/";
-            }, 1500);
-        }).catch(error => {
-            loadingOverlay.classList.remove('active');
-            showPopup('error', 'Logout Gagal', error.message);
         });
-    };
 
+        // ================= AUTH STATE (SUNTIK HTML KE DESKTOP & MOBILE) =================
+        onAuthStateChanged(auth, (user) => {
+            const authDivDesktop = document.getElementById("authButton");
+            const authDivMobile = document.getElementById("authButtonMobile");
+
+            if (user) {
+                // Tampilan Menu Jika Sudah Login
+                const loggedInHTMLDesktop = `
+                    <a href="/dashboard" class="text-sm font-bold text-white bg-brand-900 px-5 py-2.5 rounded-full hover:bg-brand-800 transition">
+                        <i class="fas fa-chart-line mr-1.5"></i> Dashboard
+                    </a>
+                    <button onclick="logout()" class="text-sm font-bold text-white bg-red-600 px-5 py-2.5 rounded-full hover:bg-red-700 transition flex items-center gap-1.5">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                `;
+
+                const loggedInHTMLMobile = `
+                    <a href="/dashboard" class="w-full text-center text-base font-bold text-white bg-brand-900 py-3 px-5 rounded-xl transition shadow-sm">
+                        <i class="fas fa-chart-line mr-1.5"></i> Dashboard
+                    </a>
+                    <button onclick="logout()" class="w-full text-center text-base font-bold text-white bg-red-600 py-3 px-5 rounded-xl transition flex items-center justify-center gap-1.5">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                `;
+
+                if(authDivDesktop) authDivDesktop.innerHTML = loggedInHTMLDesktop;
+                if(authDivMobile) authDivMobile.innerHTML = loggedInHTMLMobile;
+            } else {
+                // Tampilan Menu Jika Belum Login
+                const loggedOutHTMLDesktop = `
+                    <button onclick="openModal('login')" class="text-sm font-bold text-white bg-brand-900 px-5 py-2.5 rounded-full hover:bg-brand-800 transition">
+                        <i class="fas fa-lock mr-1.5"></i> Login
+                    </button>
+                `;
+
+                const loggedOutHTMLMobile = `
+                    <button onclick="openModal('login')" class="w-full text-center text-base font-bold text-white bg-brand-900 py-3 px-5 rounded-xl transition flex items-center justify-center gap-1.5">
+                        <i class="fas fa-lock mr-1.5"></i> Login
+                    </button>
+                `;
+
+                if(authDivDesktop) authDivDesktop.innerHTML = loggedOutHTMLDesktop;
+                if(authDivMobile) authDivMobile.innerHTML = loggedOutHTMLMobile;
+            }
+        });
+
+        // ================= LOGOUT =================
+        window.logout = function() {
+            if (!confirm('Apakah Anda yakin ingin logout?')) return;
+
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.add('active');
+
+            signOut(auth).then(async () => {
+                // Logout dari Laravel
+                try {
+                    await fetch('/api/logout-firebase', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                } catch (e) {
+                    console.log('Logout dari server:', e);
+                }
+
+                showPopup('success', 'Berhasil Logout', 'Mengarahkan ke halaman utama...');
+                setTimeout(() => {
+                    loadingOverlay.classList.remove('active');
+                    window.location.href = "/";
+                }, 1500);
+            }).catch(error => {
+                loadingOverlay.classList.remove('active');
+                showPopup('error', 'Gagal Logout', error.message);
+            });
+        }
     </script>
-
-    <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyC0QjC5TAy-ia1AzLLaaPLL53gcmLH1TbM",
-        authDomain: "smartoryza.firebaseapp.com",
-        databaseURL: "https://smartoryza-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "smartoryza",
-        storageBucket: "smartoryza.firebasestorage.app",
-        messagingSenderId: "63042198526",
-        appId: "1:63042198526:web:fa0620b2c786a53c977eaf",
-        measurementId: "G-S9Q8YM6609"
-    };
-
-    </script>
+</body>
 </html>

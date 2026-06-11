@@ -166,6 +166,21 @@
             border: 1px solid #f3f4f6 !important;
         }
 
+        /* ===== SOIL MOISTURE CARD STATES ===== */
+        .soil-card-dry {
+            border: 2px solid #f59e0b !important;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12) !important;
+        }
+
+        .soil-card-flood {
+            border: 2px solid #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+        }
+
+        .soil-card-normal {
+            border: 1px solid #f3f4f6 !important;
+        }
+
         /* Water level bar */
         .water-level-bar {
             height: 6px;
@@ -274,7 +289,7 @@
 
 <body class="min-h-screen text-gray-800 antialiased pb-12">
 
-    <!-- ===== FLOOD TOAST NOTIFICATION ===== -->
+    <!-- ===== FLOOD / SOIL TOAST NOTIFICATION ===== -->
     <div id="flood-toast">
         <div id="flood-toast-icon" class="text-2xl mt-0.5">🚨</div>
         <div class="flex-1">
@@ -405,6 +420,48 @@
             </div>
         </div>
 
+        <!-- ===== SOIL MOISTURE ALERT BANNER ===== -->
+        <div id="alert-tanah" class="hidden mb-5">
+            <!-- Kering -->
+            <div id="alert-tanah-kering"
+                class="flood-alert-animate hidden bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 flex items-start gap-4">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span class="text-xl">🌵</span>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-amber-800 mb-0.5">TANAH KERING — Irigasi Diperlukan!</p>
+                    <p class="text-xs text-amber-700 leading-relaxed">
+                        Kelembapan tanah hanya <b id="alert-tanah-val-kering">— %</b>. 
+                        Tanah berada di bawah ambang batas aman (15%). Segera buka pintu air atau aktifkan irigasi untuk mencegah tanaman layu!
+                    </p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">● TANAH KERING</span>
+                        <span class="text-[10px] text-amber-500" id="alert-tanah-time-kering">—</span>
+                    </div>
+                </div>
+                <button onclick="dismissTanahAlert()" class="text-amber-400 hover:text-amber-600 text-lg leading-none flex-shrink-0">✕</button>
+            </div>
+            <!-- Jenuh/Banjir -->
+            <div id="alert-tanah-jenuh"
+                class="hidden bg-blue-50 border-2 border-blue-300 rounded-2xl p-4 flex items-start gap-4">
+                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span class="text-xl">💧</span>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-blue-800 mb-0.5">TANAH JENUH — Risiko Genangan!</p>
+                    <p class="text-xs text-blue-700 leading-relaxed">
+                        Kelembapan tanah mencapai <b id="alert-tanah-val-jenuh">— %</b>. 
+                        Tanah sudah sangat basah (≥ 90%). Segera tutup pintu air dan pastikan saluran pembuangan terbuka!
+                    </p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">● TANAH JENUH</span>
+                        <span class="text-[10px] text-blue-500" id="alert-tanah-time-jenuh">—</span>
+                    </div>
+                </div>
+                <button onclick="dismissTanahAlert()" class="text-blue-400 hover:text-blue-600 text-lg leading-none flex-shrink-0">✕</button>
+            </div>
+        </div>
+
         <div id="siklus-tanam-container" class="mb-6 bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                 <div>
@@ -470,14 +527,25 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 
                     <!-- Kelembapan Tanah -->
-                    <div class="stat-card bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                        <p class="text-sm font-medium text-gray-500 mb-2">Kelembapan Tanah</p>
+                    <div class="stat-card bg-white rounded-2xl p-6 shadow-sm soil-card-normal transition-all duration-300" id="soil-card">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-sm font-medium text-gray-500">Kelembapan Tanah</p>
+                            <span id="soil-level-badge"
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-400">
+                                <span id="soil-level-dot" class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                                <span id="soil-level-text">Memuat...</span>
+                            </span>
+                        </div>
                         <div class="flex items-baseline gap-1">
                             <h3 class="text-4xl font-extrabold text-gray-900" id="soil-value">0</h3>
                             <span class="text-lg text-gray-500 font-bold">%</span>
                         </div>
                         <div class="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div id="soil-bar" class="h-full bg-blue-500 w-0 transition-all duration-500"></div>
+                            <div id="soil-bar" class="h-full bg-emerald-500 w-0 transition-all duration-500"></div>
+                        </div>
+                        <div class="flex justify-between text-[9px] text-gray-300 font-medium mt-1">
+                            <span>Kering (0%)</span>
+                            <span>Jenuh (100%)</span>
                         </div>
                     </div>
 
@@ -532,7 +600,7 @@
                     <!-- Hama (PIR) -->
                     <div class="stat-card bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                         <div class="flex justify-between items-start mb-2">
-                            <p class="text-sm font-medium text-gray-500">Hama (PIR)</p>
+                            <p class="text-sm font-medium text-gray-500">Hama</p>
                             <span id="servo2-badge"
                                 class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-400">IDLE</span>
                         </div>
@@ -557,6 +625,13 @@
                                 <span id="flood-status-mini-text" class="text-[10px] font-bold text-red-300">Air Sungai Kritis</span>
                             </div>
                         </div>
+                        <!-- Soil status indicator in system card -->
+                        <div id="soil-status-mini" class="mt-2 hidden">
+                            <div class="flex items-center gap-2">
+                                <span id="soil-status-mini-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                                <span id="soil-status-mini-text" class="text-[10px] font-bold text-amber-300">Tanah Kering</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -564,10 +639,16 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <!-- Grafik Kelembapan Tanah -->
                     <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="w-3 h-3 rounded-full bg-blue-500"></span>
-                            <h3 class="font-bold text-gray-700">Kelembapan Tanah</h3>
-                            <span class="ml-auto text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">Real-Time</span>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                                <h3 class="font-bold text-gray-700">Kelembapan Tanah</h3>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] text-amber-500 font-bold bg-amber-50 px-2 py-0.5 rounded-full">🌵 Kering &lt;15%</span>
+                                <span class="text-[9px] text-blue-500 font-bold bg-blue-50 px-2 py-0.5 rounded-full">💧 Jenuh &gt;90%</span>
+                                <span class="ml-1 text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">Real-Time</span>
+                            </div>
                         </div>
                         <div class="h-56"><canvas id="soilChart"></canvas></div>
                     </div>
@@ -688,7 +769,7 @@
     <script>
         let activeSawah = 1;
         let toastDismissed = false;
-        let lastFloodLevel = 'normal'; // track level changes
+        let lastFloodLevel = 'normal';
 
         const dummyData = {
             2: { soil: 62, water: 14.2, pir: 'Aman', mode: 'OTOMATIS', esp: 'Standby' },
@@ -696,18 +777,23 @@
             4: { soil: 0,  water: 0,    pir: 'Aman', mode: 'OFFLINE',  esp: 'Tidak Terhubung' },
         };
 
-        // ===== FLOOD THRESHOLD (jarak sensor ke permukaan air, dalam cm) =====
-        // Makin KECIL jarak = air makin TINGGI / hampir meluap
-        // Tempat air kecil: range efektif 2–8 cm
-        const THRESHOLD_SIAGA   = 5;   // kuning: air mulai naik (jarak < 5 cm)
-        const THRESHOLD_KRITIS  = 2.5; // merah: air hampir meluap (jarak ≤ 2.5 cm)
-        const MAX_SENSOR_RANGE  = 8;   // jarak maksimal normal sensor (cm)
+        // ===== FLOOD THRESHOLD =====
+        const THRESHOLD_SIAGA   = 5;
+        const THRESHOLD_KRITIS  = 2.5;
+        const MAX_SENSOR_RANGE  = 8;
 
-        // ===== OFFLINE / STALE DATA DETECTION =====
-        // Jika tidak ada data baru dalam X detik, anggap alat offline
-        const OFFLINE_TIMEOUT_MS = 30000; // 30 detik tanpa data = offline
+        // ===== SOIL MOISTURE THRESHOLD =====
+        const SOIL_DRY   = 15;   // < 15% = kering
+        const SOIL_FLOOD = 90;   // > 90% = jenuh
+
+        // ===== OFFLINE DETECTION =====
+        const OFFLINE_TIMEOUT_MS = 30000;
         let lastDataTimestamp    = null;
         let offlineCheckInterval = null;
+
+        // ===== SOIL ALERT STATE =====
+        let lastSoilLevel      = 'normal';
+        let soilToastDismissed = false;
 
         function startOfflineChecker() {
             if (offlineCheckInterval) clearInterval(offlineCheckInterval);
@@ -717,49 +803,60 @@
                 const espStatus  = document.getElementById('esp32-status');
                 const sysStatus  = document.getElementById('system-status');
                 const alertCont  = document.getElementById('alert-container');
-                const distEl     = document.getElementById('distance');
 
                 if (elapsed > OFFLINE_TIMEOUT_MS) {
-                    // Alat offline — tampilkan indikator
                     if (espStatus)  espStatus.innerText = '⚠ ESP32 Tidak Merespons';
                     if (sysStatus)  { sysStatus.innerText = 'Perangkat Offline'; sysStatus.className = 'text-sm font-bold text-red-600'; }
                     if (alertCont)  alertCont.className = 'bg-white border border-red-200 px-4 py-2 rounded-xl flex items-center gap-3 shadow-sm self-start';
-                    // Ketika offline, jangan trigger peringatan banjir dari data lama
-                    const wBadge = document.getElementById('water-level-badge');
                     const wText  = document.getElementById('water-level-text');
                     const wDot   = document.getElementById('water-level-dot');
+                    const wBadge = document.getElementById('water-level-badge');
                     if (wText) wText.innerText = 'Perangkat Offline';
                     if (wDot)  wDot.className  = 'w-1.5 h-1.5 rounded-full bg-gray-400';
                     if (wBadge) wBadge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500';
-                    // Sembunyikan alert banjir kalau alat offline (data bisa stale)
                     document.getElementById('alert-banjir')?.classList.add('hidden');
                     document.getElementById('alert-banjir-kritis')?.classList.add('hidden');
                     document.getElementById('alert-banjir-siaga')?.classList.add('hidden');
+                    document.getElementById('alert-tanah')?.classList.add('hidden');
+                    document.getElementById('alert-tanah-kering')?.classList.add('hidden');
+                    document.getElementById('alert-tanah-jenuh')?.classList.add('hidden');
                     document.getElementById('flood-status-mini')?.classList.add('hidden');
+                    document.getElementById('soil-status-mini')?.classList.add('hidden');
                     const waterCard = document.getElementById('water-card');
                     if (waterCard) {
                         waterCard.className = waterCard.className.replace(/water-card-(normal|warning|danger)/g,'').trim();
                         waterCard.classList.add('water-card-normal');
                     }
+                    const soilCard = document.getElementById('soil-card');
+                    if (soilCard) {
+                        soilCard.className = soilCard.className.replace(/soil-card-(normal|dry|flood)/g,'').trim();
+                        soilCard.classList.add('soil-card-normal');
+                    }
                 } else {
-                    // Online
                     if (sysStatus) { sysStatus.innerText = 'Sistem Online'; sysStatus.className = 'text-sm font-bold text-emerald-700'; }
                     if (alertCont) alertCont.className = 'bg-white border px-4 py-2 rounded-xl flex items-center gap-3 shadow-sm self-start';
                 }
-            }, 5000); // cek setiap 5 detik
+            }, 5000);
         }
         startOfflineChecker();
 
+        // ===== FLOOD HELPERS =====
         function getFloodLevel(dist) {
             if (dist <= THRESHOLD_KRITIS) return 'kritis';
             if (dist <= THRESHOLD_SIAGA)  return 'siaga';
             return 'normal';
         }
 
-        // Kalkulasi persentase "penuh" (kebalikan dari jarak)
         function waterFillPercent(dist) {
             const pct = ((MAX_SENSOR_RANGE - Math.min(dist, MAX_SENSOR_RANGE)) / MAX_SENSOR_RANGE) * 100;
             return Math.max(0, Math.min(100, pct));
+        }
+
+        // ===== SOIL HELPERS =====
+        function getSoilLevel(val) {
+            if (val < SOIL_DRY)   return 'kering';
+            if (val > SOIL_FLOOD) return 'jenuh';
+            return 'normal';
         }
 
         // ===== UPDATE FLOOD UI =====
@@ -780,23 +877,18 @@
             const pct = waterFillPercent(dist);
             const nowStr = new Date().toLocaleTimeString('id-ID');
 
-            // Update progress bar fill
             if (fill) {
                 fill.style.width = pct + '%';
                 fill.style.backgroundColor = level === 'kritis' ? '#ef4444' : level === 'siaga' ? '#f59e0b' : '#22c55e';
             }
 
-            // Update card border
             if (waterCard) {
-                waterCard.className = waterCard.className
-                    .replace(/water-card-(normal|warning|danger)/g, '')
-                    .trim();
+                waterCard.className = waterCard.className.replace(/water-card-(normal|warning|danger)/g, '').trim();
                 if (level === 'kritis') waterCard.classList.add('water-card-danger');
                 else if (level === 'siaga') waterCard.classList.add('water-card-warning');
                 else waterCard.classList.add('water-card-normal');
             }
 
-            // Update badge
             if (level === 'kritis') {
                 if (dot)  dot.className = 'w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse';
                 if (text) text.innerText = 'KRITIS — Hampir Luap!';
@@ -811,7 +903,6 @@
                 if (badge) badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700';
             }
 
-            // Update banner alert
             if (level === 'kritis') {
                 if (alertBanjir) alertBanjir.classList.remove('hidden');
                 if (alertKritis) {
@@ -825,8 +916,7 @@
                 if (floodMini) {
                     floodMini.classList.remove('hidden');
                     if (floodMiniDot) floodMiniDot.className = 'w-2 h-2 rounded-full bg-red-400 animate-pulse';
-                    if (floodMiniText) floodMiniText.innerText = 'Air Sungai Kritis';
-                    floodMiniText.className = 'text-[10px] font-bold text-red-300';
+                    if (floodMiniText) { floodMiniText.innerText = 'Air Sungai Kritis'; floodMiniText.className = 'text-[10px] font-bold text-red-300'; }
                 }
             } else if (level === 'siaga') {
                 if (alertBanjir) alertBanjir.classList.remove('hidden');
@@ -841,24 +931,120 @@
                 if (floodMini) {
                     floodMini.classList.remove('hidden');
                     if (floodMiniDot) floodMiniDot.className = 'w-2 h-2 rounded-full bg-amber-400';
-                    if (floodMiniText) {
-                        floodMiniText.innerText = 'Air Sungai Siaga';
-                        floodMiniText.className = 'text-[10px] font-bold text-amber-300';
-                    }
+                    if (floodMiniText) { floodMiniText.innerText = 'Air Sungai Siaga'; floodMiniText.className = 'text-[10px] font-bold text-amber-300'; }
                 }
             } else {
                 if (alertBanjir) alertBanjir.classList.add('hidden');
                 if (alertKritis) alertKritis.classList.add('hidden');
                 if (alertSiaga)  alertSiaga.classList.add('hidden');
                 if (floodMini)   floodMini.classList.add('hidden');
-                toastDismissed = false; // reset toast dismiss saat kembali normal
+                toastDismissed = false;
             }
 
-            // Trigger toast hanya saat level NAIK (normal→siaga, siaga→kritis, normal→kritis)
             if (level !== lastFloodLevel && level !== 'normal' && !toastDismissed) {
                 showFloodToast(level, dist);
             }
             lastFloodLevel = level;
+        }
+
+        // ===== UPDATE SOIL UI =====
+        function updateSoilUI(soilVal) {
+            const level    = getSoilLevel(soilVal);
+            const soilCard = document.getElementById('soil-card');
+            const badge    = document.getElementById('soil-level-badge');
+            const dot      = document.getElementById('soil-level-dot');
+            const text     = document.getElementById('soil-level-text');
+            const bar      = document.getElementById('soil-bar');
+            const soilMini    = document.getElementById('soil-status-mini');
+            const soilMiniDot = document.getElementById('soil-status-mini-dot');
+            const soilMiniText = document.getElementById('soil-status-mini-text');
+            const nowStr   = new Date().toLocaleTimeString('id-ID');
+
+            // Bar color
+            if (bar) {
+                bar.style.backgroundColor =
+                    level === 'kering' ? '#f59e0b' :
+                    level === 'jenuh'  ? '#3b82f6' : '#22c55e';
+            }
+
+            // Card border
+            if (soilCard) {
+                soilCard.className = soilCard.className.replace(/soil-card-(normal|dry|flood)/g, '').trim();
+                soilCard.classList.add(
+                    level === 'kering' ? 'soil-card-dry' :
+                    level === 'jenuh'  ? 'soil-card-flood' : 'soil-card-normal'
+                );
+            }
+
+            // Badge
+            if (level === 'kering') {
+                if (dot)   dot.className   = 'w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse';
+                if (text)  text.innerText  = 'KERING — Irigasi!';
+                if (badge) badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700';
+            } else if (level === 'jenuh') {
+                if (dot)   dot.className   = 'w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse';
+                if (text)  text.innerText  = 'JENUH — Tutup Air!';
+                if (badge) badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700';
+            } else {
+                if (dot)   dot.className   = 'w-1.5 h-1.5 rounded-full bg-emerald-500';
+                if (text)  text.innerText  = 'Normal';
+                if (badge) badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700';
+            }
+
+            // System card mini indicator
+            if (level === 'kering') {
+                if (soilMini) {
+                    soilMini.classList.remove('hidden');
+                    if (soilMiniDot) soilMiniDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+                    if (soilMiniText) { soilMiniText.innerText = 'Tanah Kering'; soilMiniText.className = 'text-[10px] font-bold text-amber-300'; }
+                }
+            } else if (level === 'jenuh') {
+                if (soilMini) {
+                    soilMini.classList.remove('hidden');
+                    if (soilMiniDot) soilMiniDot.className = 'w-2 h-2 rounded-full bg-blue-400 animate-pulse';
+                    if (soilMiniText) { soilMiniText.innerText = 'Tanah Jenuh'; soilMiniText.className = 'text-[10px] font-bold text-blue-300'; }
+                }
+            } else {
+                if (soilMini) soilMini.classList.add('hidden');
+            }
+
+            // Banner alert
+            const alertTanah  = document.getElementById('alert-tanah');
+            const alertKering = document.getElementById('alert-tanah-kering');
+            const alertJenuh  = document.getElementById('alert-tanah-jenuh');
+
+            if (level === 'kering') {
+                if (alertTanah)  alertTanah.classList.remove('hidden');
+                if (alertKering) {
+                    alertKering.classList.remove('hidden');
+                    const v = document.getElementById('alert-tanah-val-kering');
+                    const t = document.getElementById('alert-tanah-time-kering');
+                    if (v) v.innerText = soilVal + ' %';
+                    if (t) t.innerText = 'Terdeteksi pada ' + nowStr;
+                }
+                if (alertJenuh) alertJenuh.classList.add('hidden');
+            } else if (level === 'jenuh') {
+                if (alertTanah)  alertTanah.classList.remove('hidden');
+                if (alertJenuh) {
+                    alertJenuh.classList.remove('hidden');
+                    const v = document.getElementById('alert-tanah-val-jenuh');
+                    const t = document.getElementById('alert-tanah-time-jenuh');
+                    if (v) v.innerText = soilVal + ' %';
+                    if (t) t.innerText = 'Terdeteksi pada ' + nowStr;
+                }
+                if (alertKering) alertKering.classList.add('hidden');
+            } else {
+                if (alertTanah)  alertTanah.classList.add('hidden');
+                if (alertKering) alertKering.classList.add('hidden');
+                if (alertJenuh)  alertJenuh.classList.add('hidden');
+                soilToastDismissed = false;
+            }
+
+            // Toast (hanya saat level berubah)
+            if (level !== lastSoilLevel && level !== 'normal' && !soilToastDismissed) {
+                showSoilToast(level, soilVal);
+            }
+            lastSoilLevel = level;
         }
 
         // ===== TOAST =====
@@ -875,7 +1061,6 @@
             clearTimeout(toastTimer);
 
             if (level === 'kritis') {
-                toast.className = toast.className.replace('warning-toast', '').trim();
                 toast.style.borderLeftColor = '#ef4444';
                 if (icon)  icon.innerText = '🚨';
                 if (title) { title.innerText = 'KRITIS — Air Hampir Meluap!'; title.className = 'text-sm font-bold text-red-700 mb-0.5 leading-tight'; }
@@ -889,22 +1074,50 @@
 
             if (time) time.innerText = new Date().toLocaleTimeString('id-ID');
             toast.classList.add('show');
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 7000);
+        }
 
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 7000);
+        function showSoilToast(level, val) {
+            const toast = document.getElementById('flood-toast');
+            const icon  = document.getElementById('flood-toast-icon');
+            const title = document.getElementById('flood-toast-title');
+            const body  = document.getElementById('flood-toast-body');
+            const time  = document.getElementById('flood-toast-time');
+            if (!toast) return;
+
+            clearTimeout(toastTimer);
+
+            if (level === 'kering') {
+                toast.style.borderLeftColor = '#f59e0b';
+                if (icon)  icon.innerText = '🌵';
+                if (title) { title.innerText = 'Tanah Kering — Irigasi Segera!'; title.className = 'text-sm font-bold text-amber-700 mb-0.5 leading-tight'; }
+                if (body)  body.innerText = `Kelembapan tanah ${val}% (di bawah 15%). Segera buka pintu air atau aktifkan irigasi!`;
+            } else {
+                toast.style.borderLeftColor = '#3b82f6';
+                if (icon)  icon.innerText = '💧';
+                if (title) { title.innerText = 'Tanah Jenuh — Tutup Air!'; title.className = 'text-sm font-bold text-blue-700 mb-0.5 leading-tight'; }
+                if (body)  body.innerText = `Kelembapan tanah ${val}% (di atas 90%). Segera tutup pintu air dan buka saluran pembuangan!`;
+            }
+
+            if (time) time.innerText = new Date().toLocaleTimeString('id-ID');
+            toast.classList.add('show');
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 7000);
         }
 
         function dismissToast() {
             const toast = document.getElementById('flood-toast');
             if (toast) toast.classList.remove('show');
             toastDismissed = true;
+            soilToastDismissed = true;
             clearTimeout(toastTimer);
         }
 
         function dismissBanjirAlert() {
-            const alertBanjir = document.getElementById('alert-banjir');
-            if (alertBanjir) alertBanjir.classList.add('hidden');
+            document.getElementById('alert-banjir')?.classList.add('hidden');
+        }
+
+        function dismissTanahAlert() {
+            document.getElementById('alert-tanah')?.classList.add('hidden');
         }
 
         // ===== SWITCH SAWAH =====
@@ -933,7 +1146,6 @@
                 const d = dummyData[n];
                 if (!d) return;
 
-                document.getElementById('soil-value')?.setAttribute('innerText', d.soil);
                 if (document.getElementById('soil-value')) document.getElementById('soil-value').innerText = d.soil;
                 if (document.getElementById('soil-bar'))   document.getElementById('soil-bar').style.width = d.soil + '%';
                 if (document.getElementById('distance'))   document.getElementById('distance').innerText = d.water;
@@ -953,8 +1165,8 @@
                         : 'h-4 w-4 rounded-full bg-emerald-500';
                 }
 
-                // Update flood UI for dummy data
                 updateFloodUI(parseFloat(d.water) || 0);
+                updateSoilUI(parseInt(d.soil) || 0);
             }
         }
     </script>
@@ -988,12 +1200,12 @@
                 datasets: [{
                     label: 'Kelembapan (%)',
                     data: soilData,
-                    borderColor: '#3b82f6',
+                    borderColor: '#22c55e',
                     tension: 0.4,
                     fill: true,
-                    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.08)',
                     pointRadius: 3,
-                    pointBackgroundColor: '#3b82f6'
+                    pointBackgroundColor: '#22c55e'
                 }]
             },
             options: {
@@ -1002,7 +1214,8 @@
                 plugins: { legend: { display: false } },
                 scales: {
                     y: {
-                        beginAtZero: true, max: 100,
+                        beginAtZero: true,
+                        max: 100,
                         ticks: { callback: v => v + '%' },
                         grid: { color: 'rgba(0,0,0,0.04)' }
                     },
@@ -1011,33 +1224,28 @@
             }
         });
 
-        // ===== CHART: WATER (dengan threshold line) =====
+        // ===== CHART: WATER =====
         const waterCtx = document.getElementById('waterChart').getContext('2d');
         let waterData = [], waterLabels = [];
         const waterChart = new Chart(waterCtx, {
             type: 'line',
             data: {
                 labels: waterLabels,
-                datasets: [
-                    {
-                        label: 'Jarak Sensor (cm)',
-                        data: waterData,
-                        borderColor: '#22c55e',
-                        tension: 0.4,
-                        fill: true,
-                        backgroundColor: 'rgba(34, 197, 94, 0.08)',
-                        pointRadius: 3,
-                        pointBackgroundColor: '#22c55e'
-                    }
-                ]
+                datasets: [{
+                    label: 'Jarak Sensor (cm)',
+                    data: waterData,
+                    borderColor: '#22c55e',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(34, 197, 94, 0.08)',
+                    pointRadius: 3,
+                    pointBackgroundColor: '#22c55e'
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    annotation: {}
-                },
+                plugins: { legend: { display: false }, annotation: {} },
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -1049,10 +1257,15 @@
             }
         });
 
-        // Override point color based on flood level
-        function getPointColor(val) {
-            if (val <= 15) return '#ef4444';
-            if (val <= 30) return '#f59e0b';
+        function getSoilPointColor(val) {
+            if (val < 15)  return '#f59e0b';
+            if (val > 90)  return '#3b82f6';
+            return '#22c55e';
+        }
+
+        function getWaterPointColor(val) {
+            if (val <= 2.5) return '#ef4444';
+            if (val <= 5)   return '#f59e0b';
             return '#22c55e';
         }
 
@@ -1161,11 +1374,12 @@
         };
 
         function updateRealtimeUI(data) {
-            const dist = parseFloat(data.water) || 0;
+            const dist     = parseFloat(data.water) || 0;
+            const soilVal  = parseInt(data.soil) || 0;
 
             document.getElementById('alert-water-level') && (document.getElementById('alert-water-level').innerText = dist + 'cm');
-            document.getElementById('soil-value')  && (document.getElementById('soil-value').innerText  = data.soil || 0);
-            document.getElementById('soil-bar')    && (document.getElementById('soil-bar').style.width  = (data.soil || 0) + '%');
+            document.getElementById('soil-value')  && (document.getElementById('soil-value').innerText  = soilVal);
+            document.getElementById('soil-bar')    && (document.getElementById('soil-bar').style.width  = soilVal + '%');
             document.getElementById('distance')    && (document.getElementById('distance').innerText    = data.water || 0);
             document.getElementById('esp32-status') && (document.getElementById('esp32-status').innerText = 'ESP32 Aktif');
 
@@ -1177,8 +1391,9 @@
             if (pirDot)    pirDot.className = isBahaya ? 'h-4 w-4 rounded-full bg-red-600 animate-pulse' : 'h-4 w-4 rounded-full bg-emerald-500';
             if (srv2Badge) srv2Badge.innerText = isBahaya ? 'BAHAYA' : 'IDLE';
 
-            // === FLOOD CHECK ===
+            // Flood & Soil checks
             updateFloodUI(dist);
+            updateSoilUI(soilVal);
         }
 
         // ===== LISTEN DATA TELEMETRI TERBARU =====
@@ -1187,7 +1402,6 @@
             if (!data) return;
             databaseCache.latest = data;
 
-            // Update timestamp untuk offline detection
             lastDataTimestamp = Date.now();
             if (activeSawah === 1) updateRealtimeUI(data);
 
@@ -1202,15 +1416,18 @@
             waterLabels.push(timeStr);
             waterData.push(data.water || 0);
 
-            // Dynamic point colors for water chart
-            waterChart.data.datasets[0].pointBackgroundColor = waterData.map(v => getPointColor(v));
-            waterChart.data.datasets[0].borderColor = getPointColor(data.water || 0);
+            // Dynamic point colors
+            soilChart.data.datasets[0].pointBackgroundColor = soilData.map(v => getSoilPointColor(v));
+            soilChart.data.datasets[0].borderColor = getSoilPointColor(data.soil || 0);
+
+            waterChart.data.datasets[0].pointBackgroundColor = waterData.map(v => getWaterPointColor(v));
+            waterChart.data.datasets[0].borderColor = getWaterPointColor(data.water || 0);
 
             soilChart.update();
             waterChart.update();
         });
 
-        // ===== LISTEN STATUS KONTROL RELAY/SERVO =====
+        // ===== LISTEN STATUS KONTROL =====
         onValue(ref(db, 'iot/control/pintu_air'), (snapshot) => {
             if (activeSawah !== 1) return;
             const val = snapshot.val();
@@ -1245,17 +1462,27 @@
             const data = snapshot.val();
             if (data) {
                 Object.values(data).reverse().forEach(log => {
-                    const isBahaya = (log.pir || '').toLowerCase() === 'bahaya';
-                    const waterDist = parseFloat(log.water) || 0;
+                    const isBahaya   = (log.pir || '').toLowerCase() === 'bahaya';
+                    const waterDist  = parseFloat(log.water) || 0;
+                    const soilVal    = parseInt(log.soil) || 0;
                     const floodLevel = getFloodLevel(waterDist);
+                    const soilLevel  = getSoilLevel(soilVal);
+                    const borderColor =
+                        isBahaya           ? 'border-red-500'   :
+                        floodLevel === 'kritis' ? 'border-red-400'   :
+                        floodLevel === 'siaga'  ? 'border-amber-400' :
+                        soilLevel  === 'kering' ? 'border-amber-300' :
+                        soilLevel  === 'jenuh'  ? 'border-blue-400'  :
+                        'border-emerald-500';
                     const div = document.createElement('div');
-                    div.className = `p-3 bg-gray-50 rounded-xl border-l-4 ${isBahaya ? 'border-red-500' : floodLevel === 'kritis' ? 'border-red-400' : floodLevel === 'siaga' ? 'border-amber-400' : 'border-emerald-500'}`;
+                    div.className = `p-3 bg-gray-50 rounded-xl border-l-4 ${borderColor}`;
                     div.innerHTML = `
                         <div class="flex justify-between mb-1">
                             <span class="text-[10px] text-gray-400">${formatWaktu(log.created_at)}</span>
                             <span class="font-bold text-[10px] ${isBahaya ? 'text-red-600' : 'text-emerald-600'}">${log.pir}</span>
                         </div>
                         <p class="text-[11px] text-gray-600">Tanah: <b>${log.soil}%</b> | Air: <b>${log.water}cm</b>
+                            ${soilLevel === 'kering' ? '<span class="text-amber-500 font-bold ml-1">🌵 Kering</span>' : soilLevel === 'jenuh' ? '<span class="text-blue-500 font-bold ml-1">💧 Jenuh</span>' : ''}
                             ${floodLevel === 'kritis' ? '<span class="text-red-500 font-bold ml-1">🚨 Kritis</span>' : floodLevel === 'siaga' ? '<span class="text-amber-500 font-bold ml-1">⚠️ Siaga</span>' : ''}
                         </p>
                     `;
@@ -1271,9 +1498,9 @@
         let currentPage     = 1;
         let activeFilter    = 'semua';
 
-        const tbody         = document.getElementById('log-table-body');
-        const logTableCount = document.getElementById('log-table-count');
-        const pageInfo      = document.getElementById('page-info');
+        const tbody          = document.getElementById('log-table-body');
+        const logTableCount  = document.getElementById('log-table-count');
+        const pageInfo       = document.getElementById('page-info');
         const paginationBtns = document.getElementById('pagination-btns');
 
         function formatWaktu(ts) {
@@ -1378,8 +1605,11 @@
             filteredEntries.forEach((log, i) => {
                 const isBahaya   = (log.pir||'').toLowerCase()==='bahaya';
                 const waterDist  = parseFloat(log.water)||0;
+                const soilVal    = parseInt(log.soil)||0;
                 const floodLevel = getFloodLevel(waterDist);
+                const soilLevel  = getSoilLevel(soilVal);
                 const floodColor = floodLevel==='kritis'?'#b91c1c':floodLevel==='siaga'?'#92400e':'#374151';
+                const soilColor  = soilLevel==='kering'?'#92400e':soilLevel==='jenuh'?'#1d4ed8':'#374151';
                 const tr = document.createElement('tr');
                 tr.style.background = i%2===0?'#fff':'#f9fafb';
                 tr.innerHTML = `
@@ -1392,7 +1622,10 @@
                             ${isBahaya?'Bahaya':'Aman'}
                         </span>
                     </td>
-                    <td style="padding:8px 24px;text-align:center;font-weight:600;color:#374151;">${log.soil??'—'}</td>
+                    <td style="padding:8px 24px;text-align:center;font-weight:700;color:${soilColor};">
+                        ${log.soil??'—'}
+                        ${soilLevel==='kering'?' 🌵':soilLevel==='jenuh'?' 💧':''}
+                    </td>
                     <td style="padding:8px 24px;text-align:center;font-weight:700;color:${floodColor};">
                         ${log.water!=null?parseFloat(log.water).toFixed(1):'—'}
                         ${floodLevel==='kritis'?' 🚨':floodLevel==='siaga'?' ⚠️':''}
@@ -1416,7 +1649,9 @@
                 pageEntries.forEach((log, i) => {
                     const isBahaya   = (log.pir||'').toLowerCase()==='bahaya';
                     const waterDist  = parseFloat(log.water)||0;
+                    const soilVal    = parseInt(log.soil)||0;
                     const floodLevel = getFloodLevel(waterDist);
+                    const soilLevel  = getSoilLevel(soilVal);
                     const tr = document.createElement('tr');
                     tr.className = i%2===0?'bg-white':'bg-gray-50/40';
                     tr.innerHTML = `
@@ -1428,7 +1663,10 @@
                                 ${isBahaya?'Bahaya':'Aman'}
                             </span>
                         </td>
-                        <td class="px-6 py-3 text-center font-semibold text-gray-700">${log.soil??'—'}</td>
+                        <td class="px-6 py-3 text-center font-semibold ${soilLevel==='kering'?'text-amber-600':soilLevel==='jenuh'?'text-blue-600':'text-gray-700'}">
+                            ${log.soil??'—'}
+                            ${soilLevel==='kering'?'<span class="ml-1 text-[9px]">🌵</span>':soilLevel==='jenuh'?'<span class="ml-1 text-[9px]">💧</span>':''}
+                        </td>
                         <td class="px-6 py-3 text-center font-semibold ${floodLevel==='kritis'?'text-red-600':floodLevel==='siaga'?'text-amber-600':'text-gray-700'}">
                             ${log.water!=null?parseFloat(log.water).toFixed(1):'—'}
                             ${floodLevel==='kritis'?'<span class="ml-1 text-[9px]">🚨</span>':floodLevel==='siaga'?'<span class="ml-1 text-[9px]">⚠️</span>':''}
@@ -1499,4 +1737,4 @@
         }, 1000);
     </script>
 </body>
-</html>
+</html>a
