@@ -1187,6 +1187,20 @@
 
         const app = initializeApp(firebaseConfig);
         const db  = getDatabase(app);
+        import { getAuth, onAuthStateChanged } 
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        const auth = getAuth(app);
+
+        // Cek auth - redirect ke home jika belum login
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "/";
+            } else {
+                const el = document.getElementById('username');
+                if (el) el.innerText = user.displayName || user.email;
+            }
+        });
 
         let databaseCache = { latest: null };
 
@@ -1737,4 +1751,4 @@
         }, 1000);
     </script>
 </body>
-</html>a
+</html>

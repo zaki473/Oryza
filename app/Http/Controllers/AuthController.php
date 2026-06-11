@@ -44,24 +44,18 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        // 1. Validasi input
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
 
-        // 2. Cek email & password di database
         if (Auth::attempt($request->only('email', 'password'))) {
-            // Mencegah Session Fixation attack
             $request->session()->regenerate();
 
-            return response()->json([
-                'message' => 'Login berhasil',
-                'user' => Auth::user(),
-            ]);
+            // ✅ Redirect ke dashboard, bukan return JSON
+            return redirect()->intended('/dashboard');
         }
 
-        // 3. Jika gagal
         throw ValidationException::withMessages([
             'email' => ['Kredensial / Password salah. Silakan coba lagi.'],
         ]);
@@ -73,12 +67,10 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->json([
-            'message' => 'Logout berhasil'
-        ]);
+        // ✅ Redirect ke home, bukan return JSON
+        return redirect('/');
     }
 }

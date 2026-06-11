@@ -5,18 +5,21 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SensorController;
 
 // Home
+// Home
 Route::get('/', function () {
     return view('user.home'); 
 })->name('home');
 
-Route::get('/login', function () { 
-    return view('auth.login'); 
-})->name('login');
+// Login - pakai middleware guest supaya yg sudah login ga bisa balik ke sini
 
-// Dashboard
-Route::middleware('auth')->get('/dashboard', function () {
+// Dashboard - pakai middleware auth supaya harus login dulu
+Route::get('/dashboard', function () {
     return view('dashboard');
 })->name('dashboard');
+
+Route::post('/api/logout-firebase', function () {
+    return response()->json(['message' => 'ok']);
+});
 
 // Profile
 Route::middleware('auth')->group(function () {
